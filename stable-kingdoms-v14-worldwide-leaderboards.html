@@ -1,0 +1,1878 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>STABLE KINGDOMS</title><style>
+body{font-family:system-ui;margin:0;background:#f3efe5;color:#241d16}.wrap{max-width:1200px;margin:auto;padding:20px}button{padding:10px 14px;margin:5px;border:1px solid #6e5a3d;border-radius:8px;background:#fff;cursor:pointer}.primary{background:#332719;color:white}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.k,.panel{background:#fff;border:1px solid #cfc4b2;border-radius:12px;padding:12px}.hand{display:flex;gap:8px;flex-wrap:wrap}.card{border:1px solid #aaa;padding:8px;border-radius:8px;background:#fff8e8}.muted{color:#6f665c}.choices button{display:block;width:100%;text-align:left}.top{display:flex;justify-content:space-between;gap:10px;align-items:center}@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
+.kingdomA{border-top:7px solid #c62828}.kingdomB{border-top:7px solid #1565c0}
+.kingdomC{border-top:7px solid #2e7d32}.kingdomD{border-top:7px solid #7b1fa2}
+.royals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.statline,.desireline{line-height:1.55}.identity{font-size:.92em;margin:2px 0}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 14px;font-size:.9em}
+.pill{background:#fff;border:1px solid #ddd;border-radius:999px;padding:4px 8px}
+.charcard{cursor:pointer}.charcard.selected{outline:3px solid #222}
+.inspect{margin-top:10px;padding:10px;border:1px solid #ccc;border-radius:10px;background:#fff}
+.inspectrow{padding:5px 0;border-top:1px solid #eee}.inspectrow.partner{background:#fff0b8;border:2px solid #d39b00;border-radius:7px;padding:7px;margin:3px 0}.pietyNote{font-weight:700;color:#6b4b00}.wargrid{margin-top:7px;font-size:.86em;line-height:1.5}
+.kingdomHead{cursor:pointer;user-select:none}.kingdomDetail{margin-top:10px;border-top:1px solid #ddd;padding-top:8px}.branch{margin-top:8px;padding:7px;border:1px solid #e3dacb;border-radius:8px}.ledger{max-height:340px;overflow:auto;margin-top:10px}.ledgerTurn{padding:8px 0;border-top:1px solid #ddd}.ledgerTurn:first-child{border-top:0}.ledgerLine{margin:3px 0}.tiny{font-size:.84em}.scorebox{margin:8px 0}.scoreHead{cursor:pointer;font-weight:800}.scoreBreak{margin-top:8px;padding-top:7px;border-top:1px solid #ddd}.vpTracker{margin:8px 0 12px;padding:8px;border:1px solid #d8cfbf;border-radius:9px;background:#fff}.vpItem{margin:3px 0}
+.culturePortrait{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:center top;border-radius:7px;margin:6px auto 7px;border:1px solid #b8aa94;background:#ddd}
+/* Bachelor/hand cards are much wider than kingdom cards, so portraits get their own compact size instead of stretching across the card. */
+#bachelors .culturePortrait,#hand .culturePortrait{width:132px;max-width:132px;margin-left:0;margin-right:0}
+.cultureTag{font-size:.78em;color:#765b2f;font-weight:650;white-space:nowrap}
+@media(max-width:800px){#bachelors .culturePortrait,#hand .culturePortrait{width:116px;max-width:116px}.cultureTag{font-size:.72em}}
+
+/* Online multi-device lobby. Kept separate from the local pass-and-play setup. */
+#onlineEntry{width:100%;margin-top:10px}
+#onlineCover .cover-card{max-width:660px}
+#onlineCover label{display:grid;gap:5px;margin:10px 0;font-weight:650}
+#onlineCover input{font:inherit;padding:11px;border:1px solid #afbaa9;border-radius:9px;width:100%;min-width:0}
+#onlineCover .online-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#onlineRoomCode{font-size:2.1rem;letter-spacing:0.1em;font-weight:800;user-select:all}
+#onlineError{color:#9b2121;font-weight:700;white-space:pre-line}
+#onlinePlayerList{padding:9px 0}
+#onlineBanner{position:sticky;top:0;z-index:4;background:#163d32;color:#fff;padding:8px 12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#onlineBanner[hidden],#onlineCover[hidden]{display:none!important}
+#onlineBanner button{background:#f8efd6;color:#234;border:0;padding:6px 11px}
+@media(max-width:470px){#onlineCover .online-grid{grid-template-columns:1fr}#onlineRoomCode{font-size:1.6rem}}
+</style><style>
+:root{color-scheme:light;--ink:#243a32;--gold:#bb9353;--green:#225644;--line:#d8d9ca;--dock-height:300px}
+*{box-sizing:border-box}body{background:#f3f1e9;color:var(--ink);font-family:system-ui,-apple-system,sans-serif}.wrap{max-width:1180px;padding:24px 24px calc(var(--dock-height) + 32px)}h1{font-family:Georgia,serif;font-size:clamp(22px,4vw,34px);letter-spacing:.05em;margin:5px 0}h2{font-family:Georgia,serif;font-size:22px;margin:8px 0}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:750;color:#697c6f}button,summary{min-height:44px}button{color:var(--ink);border-color:var(--line);margin:0;border-radius:10px;font:inherit;font-size:13px;touch-action:manipulation}button:hover{background:#f2ecd9}button:disabled{opacity:.5;cursor:default}button:focus-visible,[role=button]:focus-visible,summary:focus-visible{outline:3px solid #b87b16;outline-offset:3px}.primary{background:var(--green);color:#fff}.top{margin-bottom:20px}.overview{display:grid;grid-template-columns:1fr 1fr;gap:12px}.panel{border-color:var(--line);box-shadow:0 3px 16px #243a3205}.scorebox{margin:0}.scoreHead{font-size:13px;min-height:28px}.table-tools{display:flex;gap:14px;align-items:center;margin:12px 0;font-size:12px;flex-wrap:wrap}.table-tools details{position:relative}.table-tools summary{display:flex;align-items:center;cursor:pointer}.legend{position:absolute;z-index:5;top:35px;left:0;width:270px;padding:16px;background:white;border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px #0002}.table-tools label{margin-left:auto;display:flex;align-items:center;gap:6px;min-height:44px}.kingdom-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 0}.kingdom-tab{border-radius:12px 12px 0 0;background:#e8e9de;border-bottom:0;text-align:left;padding:12px}.kingdom-tab span{display:block;font-size:11px;margin-top:4px}.kingdom-tab[aria-selected=true]{background:var(--green);color:white}.kingdom-tab.legal{box-shadow:inset 0 3px #c99732}.kingdom-table{background:#e4eae0;border:1px solid #c6d2c3;border-radius:0 0 18px 18px;padding:20px}.kingdom-meta{display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap}.kingdom-meta h2{margin:0}.wargrid{margin:14px 0;font-size:12px}.crown-row{display:flex;gap:12px;justify-content:center;padding:16px 0}.columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.branch{background:#f4f5ed;padding:12px;margin:0;border-color:#ced8c9}.branch h3{font-size:13px;margin:0 0 10px}.couple{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.charcard{position:relative;width:164px;flex:0 0 164px;background:#fffcf3;border:1px solid #cfceb9;padding:10px;border-radius:12px;font-size:12px;box-shadow:0 3px 5px #25342c0b;transition:transform .18s,box-shadow .18s;overflow-wrap:anywhere}.charcard .culturePortrait,#bachelors .culturePortrait{width:100%;max-width:100%;aspect-ratio:3/4;margin:8px 0}.cultureTag{white-space:normal;display:block;margin:4px 0}.identity,.statline{font-size:11px}.desireline{font-size:10px;color:#6d7468}.charcard.selected{outline:3px solid #bb862e;transform:translateY(-3px)}.charcard.legal{outline:3px solid #488466;cursor:pointer}.legal-label{display:block;font-size:10px;font-weight:750;color:#275c43;margin-top:6px}.inspect-button{display:block;width:100%;min-height:32px;margin-top:8px;font-size:11px;background:transparent;padding:4px}.charcard.changed{animation:card-arrival .7s ease-out}.charcard[draggable=true]{cursor:grab}.drop-hover{box-shadow:0 0 0 4px #bb862e!important}.public-area{margin-top:24px}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.public-cards{display:flex;gap:12px;overflow-x:auto;padding:8px 4px 14px;scroll-snap-type:x proximity}.public-cards>.charcard{scroll-snap-align:start}.proposal{border:1px solid #c6cbbd;padding:12px;border-radius:12px;background:#ebece1;flex:0 0 auto}.proposal .couple{flex-wrap:nowrap}.private-notes{margin-top:20px}.private-notes summary{cursor:pointer;padding:12px}.inspect{margin:0;border:0}.turn-dock{position:fixed;z-index:10;bottom:0;left:0;right:0;background:#fffdf6;border-top:1px solid #c6c9ba;box-shadow:0 -8px 25px #243a3212;padding-bottom:env(safe-area-inset-bottom)}.dock-inner{max-width:1180px;margin:auto;padding:12px 24px}.turn-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.turn-heading h2{font-family:system-ui;font-size:15px;margin:0}.turn-heading button{min-height:32px;padding:4px 8px;font-size:11px}#selectionHint{font-size:12px;margin:5px 0 8px;color:#596b5b}.choices{display:flex;gap:8px;overflow:auto;max-height:84px;padding:3px 3px 8px}.choices button{display:block;flex:0 0 auto;max-width:340px;text-align:left;font-size:12px;padding:8px 12px}.hand-heading{display:flex;gap:10px;align-items:center;font-size:12px;margin:4px 0 8px}.hand-heading span{font-size:11px}#hand{flex-wrap:nowrap;overflow-x:auto;padding:4px 4px 8px;gap:10px}#hand .charcard{width:230px;flex-basis:230px;min-height:100px;padding:8px}#hand .culturePortrait{float:left;width:60px;max-width:60px;height:80px;margin:0 10px 0 0}#hand .cultureTag,#hand .desireline,#hand .inspect-button{display:none}#hand .identity{margin:6px 0}#hand .piety-card{width:105px;flex-basis:105px;display:grid;place-content:center;text-align:center;background:#eceade}.busy .turn-dock{background:#f0f2eb}#botActivity{margin:10px 0;background:#e4eade;border-color:#a9bda8;font-size:13px}#botActivity ul{padding-left:20px;margin-bottom:0}.thinking::after{content:' ● ● ●';display:inline-block;animation:thinking 1s ease-in-out infinite;color:#477b5c}.bot-results{animation:card-arrival .5s ease-out}[hidden]{display:none!important}
+@keyframes thinking{50%{opacity:.25;transform:translateX(4px)}}@keyframes card-arrival{from{opacity:.3;transform:translateY(-12px);box-shadow:0 0 0 4px #bb862e}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){.wrap{padding:16px 12px calc(var(--dock-height) + 24px)}.overview{grid-template-columns:1fr}.scorebox{padding:10px;display:flex;flex-wrap:wrap;gap:6px 16px}.scoreHead{margin:0!important}.scoreBreak{flex-basis:100%}.kingdom-tabs{gap:4px}.kingdom-tab{padding:10px 6px;font-size:12px}.kingdom-tab span{font-size:9px}.kingdom-table{padding:12px}.columns{grid-template-columns:1fr}.couple{flex-wrap:nowrap;overflow-x:auto;padding:4px}.branch .charcard{flex-basis:140px;width:140px}.charcard{width:140px;flex-basis:140px}.crown-row{gap:10px}.dock-inner{padding:10px 12px}.hand-heading span{display:none}.table-tools{gap:10px;margin:6px 0}.table-tools label{font-size:11px}.turn-heading h2{font-size:13px}.choices{max-height:66px}.choices button{max-width:260px;font-size:11px}.kingdom-meta{font-size:12px}.turn-dock #hand .charcard{flex-basis:210px;width:210px}.public-cards{gap:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Keep the crown cards inside narrow phone viewports. */
+@media(max-width:700px){.crown-row{overflow-x:auto;justify-content:flex-start}}
+
+
+/* Preferences are primary game information, not buried behind a details button. */
+#hand .desireline{display:block;clear:both;margin-top:6px;padding-top:5px;border-top:1px solid #dfdfd2;font-size:11px;line-height:1.4}
+#hand .charcard{min-height:119px}
+.preference-panel{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);width:min(780px,calc(100% - 16px));max-height:min(43svh,380px);overflow:auto;overscroll-behavior:contain;background:#fffcf3;border:2px solid #b7a072;border-radius:14px 14px 0 0;box-shadow:0 -10px 35px #192d2730;z-index:12;padding:13px 14px 16px;font-size:12px}
+.preference-panel[hidden]{display:none!important}
+.pref-top{display:flex;justify-content:space-between;align-items:start;gap:8px;position:sticky;top:-13px;background:#fffcf3;padding:10px 0 7px;z-index:1;border-bottom:1px solid #e5ddca}
+.pref-top h3{font-size:16px;margin:0 0 3px;font-family:Georgia,serif}
+.pref-top .muted{font-size:11px}
+.pref-close{min-height:36px;padding:6px 12px;flex-shrink:0}
+.pref-desires{line-height:1.75;margin:7px 0;padding:6px 9px;background:#efeee3;border-radius:8px}
+.pref-help{font-size:11px;color:#53655a;margin:5px 0 8px}
+.pref-rank{display:flex;gap:9px;align-items:center;border-top:1px solid #e9e3d8;padding:7px 4px;line-height:1.4}
+.pref-rank .number{font-weight:800;color:#4f705d;min-width:25px;font-size:14px}
+.pref-rank .pair-name{font-weight:700;flex:1;min-width:0}
+.pref-rank .pref-score{min-width:100px;text-align:right;white-space:nowrap}
+.pref-rank .pref-location{font-size:10px;color:#636960;font-weight:400}
+.pref-rank.is-legal{background:#e1f2de;border-radius:6px;cursor:pointer}.pref-rank.is-legal:hover{background:#d1eacb}.pref-rank.is-legal:focus-visible{outline:3px solid #bb862e}
+.pref-rank.current-partner{background:#f8edce;border-radius:6px}
+@media(max-width:700px){.preference-panel{max-height:min(38svh,305px);padding:10px 12px}.pref-rank .pref-score{min-width:82px}.pref-top h3{font-size:14px}#hand .desireline{font-size:10px}}
+
+/* Diplomatic threat level: red = a war involving this kingdom; amber = either warning.
+   Based on the worse of outgoing and incoming war desires (the defender is at war too). */
+.kingdom-tab.war-active {background:#b42318;color:#fff;border:3px solid #ea6257;box-shadow:inset 0 3px #f9c0ba}
+.kingdom-tab.war-warning {background:#ffe28a;color:#4c3100;border:3px solid #d99c16;box-shadow:inset 0 3px #fff2c1}
+.kingdom-tab.war-active[aria-selected="true"] {background:#a51d14;color:#fff;outline:3px solid #40302d;outline-offset:-3px}
+.kingdom-tab.war-warning[aria-selected="true"] {background:#fbd268;color:#422f00;outline:3px solid #403b29;outline-offset:-3px}
+.kingdom-table.war-active {background:#fce7e5;border:3px solid #b42318}
+.kingdom-table.war-warning {background:#fff4cf;border:3px solid #d99c16}
+.war-status-chip{display:inline-block!important;font-size:12px!important;margin:0 0 0 5px!important;white-space:nowrap;font-weight:800}
+.war-board-chip{font:800 13px system-ui,sans-serif;color:#8d1710;vertical-align:middle;white-space:nowrap}
+.war-warning .war-board-chip{color:#825800}
+.war-board-chip:empty{display:none}
+@media(max-width:700px){.war-status-chip{display:block!important;font-size:10px!important;margin:4px 0 0!important}.war-board-chip{display:block;margin-top:5px}}
+
+/* V4: Compact census-style character cards, with small portraits across all zones. */
+#kingdoms .charcard, #bachelors .charcard{width:214px;flex:0 0 214px;min-width:0;min-height:120px;padding:8px;font-size:11px;}
+#kingdoms .charcard .culturePortrait, #bachelors .charcard .culturePortrait{float:left;width:60px!important;max-width:60px!important;height:80px!important;aspect-ratio:3/4!important;margin:0 9px 2px 0!important;object-fit:cover;}
+#kingdoms .charcard::after, #bachelors .charcard::after{content:"";display:block;clear:both}
+#kingdoms .charcard .cultureTag, #bachelors .charcard .cultureTag{font-size:10px;margin:2px 0}
+#kingdoms .charcard .identity, #bachelors .charcard .identity,#kingdoms .charcard .statline,#bachelors .charcard .statline{font-size:10px}
+#kingdoms .charcard .desireline,#bachelors .charcard .desireline{font-size:10px;line-height:1.35;margin-top:4px}
+.crown-row{flex-wrap:wrap;gap:10px;padding:10px 0}
+#bachelors .public-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;overflow:visible}
+#bachelors .public-cards>.charcard{width:100%;max-width:285px;flex:initial}
+#kingdoms .couple{flex-wrap:wrap;overflow:visible;gap:8px}
+#kingdoms .columns{margin-top:8px}
+/* All-kingdoms view makes every visible couple and the shared bachelors browsable at once. */
+.kingdom-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
+.kingdom-tab.all-tab{background:#f8f4df;border-color:#c6af72}
+.kingdom-tab.all-tab[aria-selected="true"]{background:#225644;color:#fff}
+.all-kingdoms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;background:#e5eae0;border-radius:0 0 16px 16px}
+.kingdom-glance{background:#f9f7ee;border:2px solid #ccd5c8;border-radius:12px;padding:12px;min-width:0}
+.kingdom-glance.war-warning{background:#fff4cf;border-color:#d99c16}
+.kingdom-glance.war-active{background:#fce7e5;border-color:#b42318}
+.glance-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:4px}
+.glance-title button{padding:5px 9px;min-height:32px}
+.glance-people{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.glance-people .charcard{flex:1 1 180px!important;width:auto!important;max-width:290px}
+.glance-branch{margin:8px 0;border-top:1px solid #c3c8ba;padding-top:6px}
+.glance-branch h4{font-size:12px;margin:4px 0}
+.war-math-details{margin:10px 0 4px;border:1px solid #b4c3b6;border-radius:9px;background:#fffcf2;padding:5px 9px;font-size:11px}
+.war-math-details summary{cursor:pointer;min-height:30px;padding:6px 2px;font-weight:750}
+.war-equation{border-top:1px solid #e5dfd2;padding:6px 2px;line-height:1.65;overflow-wrap:anywhere}
+.war-equation code{white-space:normal;font:11px/1.5 ui-monospace,monospace}
+.dock-toggle-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;padding:0 0 5px;border-bottom:1px solid #e3e4d5;margin-bottom:5px}
+.dock-toggle-bar strong{margin-right:auto;font-size:12px}
+.dock-toggle-bar label{display:inline-flex;align-items:center;gap:5px;padding:4px 1px;min-height:26px;white-space:nowrap;cursor:pointer}
+.dock-toggle-bar input{width:16px;height:16px;accent-color:#225644}
+.dock-content[hidden]{display:none!important}
+.turn-dock .dock-inner:has(#turnContent[hidden]):has(#handContent[hidden]){padding-top:8px;padding-bottom:6px}
+/* Preserve the original hand-style small profile thumbnail on all boards. */
+@media(max-width:700px){
+ .kingdom-tabs{gap:3px}.kingdom-tab{padding:8px 4px;font-size:10px;min-width:0}.kingdom-tab span{font-size:9px}
+ .all-kingdoms{grid-template-columns:1fr;padding:6px;gap:8px}
+ #kingdoms .charcard,#bachelors .charcard{width:calc(50% - 5px);flex:0 0 calc(50% - 5px);min-width:0}
+ #bachelors .public-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .glance-people .charcard{flex:1 1 145px!important;width:auto!important}
+ .dock-toggle-bar{gap:8px}
+}
+@media(max-width:390px){.glance-people .charcard{flex:0 0 calc(50% - 4px)!important;width:calc(50% - 4px)!important;max-width:none!important}}
+.military-info{padding:8px 10px;border-radius:8px;background:#f2ece0;border:1px solid #cdbb92;font-size:.88em;line-height:1.5;margin:8px 0}
+.department-details{display:grid;gap:8px;padding:10px;margin:9px 0;border:1px solid #c9bd9d;border-radius:9px;background:#fffaf0;font-size:.86em;line-height:1.45}
+.department-details>div{border-bottom:1px solid #eee2cc;padding-bottom:5px}.department-details>div:last-child{border:0}
+.priest-tag{font-weight:700;font-size:.76em;color:#674718;margin-top:3px}
+/* V7: proposal pairs must remain side-by-side and never overlap adjacent engagements. */
+#bachelors .proposal-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,475px),1fr));gap:12px;overflow:visible}
+#bachelors .proposal-gallery>.proposal{width:100%;min-width:0;overflow:hidden;padding:10px}
+#bachelors .proposal-gallery .proposal .couple{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:0;margin-top:8px}
+#bachelors .proposal-gallery .charcard{min-width:0;width:100%!important;max-width:none!important;flex:none!important;overflow-wrap:anywhere}
+#bachelors .proposal-gallery .culturePortrait{width:55px!important;max-width:55px!important;height:73px!important;margin:0 7px 3px 0!important}
+#bachelors .proposal-gallery .charcard .identity,#bachelors .proposal-gallery .charcard .statline,#bachelors .proposal-gallery .charcard .desireline{font-size:10px;overflow-wrap:anywhere}
+.pref-protection{font-size:11px;line-height:1.45;color:#6c4b12;margin-top:5px;padding:5px;border-radius:5px;background:#fff5d8;white-space:normal}
+@media(max-width:700px){#bachelors .proposal-gallery{grid-template-columns:minmax(0,1fr)}#bachelors .proposal-gallery>.proposal{padding:7px}#bachelors .proposal-gallery .proposal .couple{gap:5px}#bachelors .proposal-gallery .culturePortrait{width:44px!important;max-width:44px!important;height:60px!important}}
+/* Chronological, phase-by-phase ledger separate from completed turn history */
+.live-turn-ledger{margin:10px 0 14px;max-height:300px;overflow-y:auto;overscroll-behavior:contain;background:#fffdfa;border:1px solid #c9bda4}
+.live-ledger-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:7px}
+.live-step{padding:7px 0;border-top:1px solid #e7dfd1;font-size:0.93em}
+.live-step:first-of-type{border-top:0}
+.live-step-title{font-weight:750;line-height:1.35}
+.live-step-results{margin:4px 0 1px 1.3em;padding:0;line-height:1.4;overflow-wrap:anywhere}
+.live-step-results li{margin:3px 0}
+.live-step-number{color:#70634e;font-variant-numeric:tabular-nums;margin-right:6px}
+@media(max-width:700px){.live-turn-ledger{max-height:220px;padding:10px}.live-step{font-size:0.88em}}
+
+/* Configurable kingdom / player setup and private-device handoff. */
+[hidden]{display:none!important}
+.game-cover{position:fixed;z-index:1000;inset:0;overflow:auto;background:#f3f1e9;display:flex;justify-content:center;align-items:flex-start;padding:clamp(15px,4vw,50px);color:#243a32}
+.cover-card{width:min(100%,560px);margin:auto;background:#fffdf6;border:1px solid #d8d9ca;border-radius:18px;box-shadow:0 12px 50px #1e3c3026;padding:clamp(18px,4vw,32px)}
+.cover-card h2{font-size:27px;margin:8px 0 10px}.cover-card p{line-height:1.5}.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}.setup-field{display:grid;gap:6px;font-weight:700}.setup-field select,.setup-field input{font:inherit;min-height:48px;padding:8px 12px;border-radius:10px;border:1px solid #a8b6aa;background:white;color:#243a32;width:100%}
+#setupNames{display:grid;gap:12px;margin-bottom:18px}.setup-tip{padding:12px;border:1px solid #d9d7bd;background:#f7f1dd;border-radius:10px;font-size:13px}.cover-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.cover-actions button{flex:1;min-height:50px}.setup-notice{font-size:14px;color:#566a5d;margin:8px 0}
+body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #inspection{visibility:hidden!important}
+@media(max-width:420px){.setup-grid{grid-template-columns:1fr}.cover-card h2{font-size:24px}}
+
+/* Online multi-device lobby. Kept separate from the local pass-and-play setup. */
+#onlineEntry{width:100%;margin-top:10px}
+#onlineCover .cover-card{max-width:660px}
+#onlineCover label{display:grid;gap:5px;margin:10px 0;font-weight:650}
+#onlineCover input{font:inherit;padding:11px;border:1px solid #afbaa9;border-radius:9px;width:100%;min-width:0}
+#onlineCover .online-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#onlineRoomCode{font-size:2.1rem;letter-spacing:0.1em;font-weight:800;user-select:all}
+#onlineError{color:#9b2121;font-weight:700;white-space:pre-line}
+#onlinePlayerList{padding:9px 0}
+#onlineBanner{position:sticky;top:0;z-index:4;background:#163d32;color:#fff;padding:8px 12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#onlineBanner[hidden],#onlineCover[hidden]{display:none!important}
+#onlineBanner button{background:#f8efd6;color:#234;border:0;padding:6px 11px}
+@media(max-width:470px){#onlineCover .online-grid{grid-template-columns:1fr}#onlineRoomCode{font-size:1.6rem}}
+
+/* Worldwide Top 10 — three score columns, independently scrolling lists. */
+#skLeaderboards{position:fixed;z-index:1200;inset:0;background:#0009;overflow:auto;padding:16px;display:grid;place-items:center}
+#skLeaderboards[hidden],#skScoreEntry[hidden]{display:none!important}
+.sk-lb-dialog{width:min(100%,1110px);max-height:calc(100dvh - 32px);overflow:auto;background:#fffdf6;border-radius:17px;padding:18px;box-shadow:0 18px 45px #0004;color:#243a32}
+.sk-lb-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sk-lb-header h2{font:700 clamp(22px,3vw,29px) Georgia,serif;margin:5px 0 9px}
+.sk-lb-scroll{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:12px;overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:10px}
+.sk-lb-column{min-width:260px;border:1px solid #d6d0bd;background:#faf8ed;border-radius:12px;padding:12px}
+.sk-lb-column h3{font-size:18px;margin:2px 0 10px}.sk-lb-rows{max-height:50dvh;min-height:310px;overflow-y:auto}
+.sk-lb-entry{display:grid;grid-template-columns:29px minmax(0,1fr) auto;gap:8px;align-items:center;border-top:1px solid #e5ded1;padding:10px 2px;font-size:14px}
+.sk-lb-entry b{font-variant-numeric:tabular-nums}.sk-lb-entry span:nth-child(2){overflow-wrap:anywhere}.sk-lb-placeholder{color:#8e8b7e}
+#skScoreEntry{position:fixed;z-index:1250;inset:0;background:#000b;display:grid;place-items:center;overflow:auto;padding:18px}
+.sk-lb-entrydialog{width:min(100%,460px);padding:22px;background:#fffdf6;color:#243a32;border-radius:16px;border:2px solid #ccaa62}
+.sk-lb-entrydialog h2{margin:0 0 12px}.sk-lb-entrydialog label{display:grid;gap:8px;font-weight:650}
+.sk-lb-entrydialog input{font:inherit;padding:12px;border:1px solid #a5ae9e;border-radius:9px;min-width:0}
+.sk-lb-message{font-weight:650;margin:10px 0;white-space:pre-wrap}
+#skLeaderboardButton{border-color:#b59551;background:#fff5d9}
+@media(max-width:860px){.sk-lb-scroll{display:flex;scroll-snap-type:x mandatory}.sk-lb-column{flex:0 0 min(77vw,315px);scroll-snap-align:start}.sk-lb-dialog{max-height:calc(100dvh - 22px)} }
+</style></head><body>
+
+<div id="skStartupNotice" style="position:fixed;inset:0;display:grid;place-items:center;z-index:1300;background:#f3efe5;font:600 20px system-ui;text-align:center;padding:16px">Loading Stable Kingdoms portraits and multiplayer…</div>
+<div id="setupCover" class="game-cover" hidden role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+ <div class="cover-card"><span class="eyebrow">Stable Kingdoms · Game setup</span><h2 id="setupTitle">Set up your kingdoms</h2>
+  <p>Choose the kingdoms in play and how many seats are controlled by humans. All remaining seats will be controlled by random bots.</p>
+  <div class="setup-grid">
+   <label class="setup-field">Kingdoms<select id="setupKingdomSelect"><option value="1">1 kingdom</option><option value="2">2 kingdoms</option><option value="3">3 kingdoms</option><option value="4" selected>4 kingdoms</option></select></label>
+   <label class="setup-field">Human players<select id="setupHumanSelect"><option value="1" selected>1 human</option></select></label>
+  </div>
+  <div id="setupNames"></div><p class="setup-notice" id="setupBots"></p>
+  <p class="setup-tip"><b>Local playtest:</b> Human players take turns on this device. A privacy screen appears between human turns. Separate phones sharing one live game will require online multiplayer synchronization.</p>
+  <div class="cover-actions"><button id="cancelSetup" type="button">Cancel</button><button class="primary" id="startSetup" type="button">Start game</button><button id="onlineEntry" type="button">🌎 Online: create or join a room</button></div>
+ </div>
+</div>
+
+<div id="onlineCover" class="game-cover" hidden role="dialog" aria-modal="true" aria-labelledby="onlineTitle">
+ <div class="cover-card">
+  <span class="eyebrow">Stable Kingdoms · Online multiplayer</span>
+  <h2 id="onlineTitle">Play together from anywhere</h2>
+  <p>Create a private room, share its seven-character join code, and play the same game on separate phones. All turns are saved in Supabase.</p>
+  <div id="onlineConfigPanel" hidden>
+    <p class="setup-tip">This preview has not been connected to a Supabase project. Enter its public project URL and publishable key. Never enter a service-role or secret key.</p>
+    <label>Project URL<input id="onlineUrl" placeholder="https://your-project.supabase.co" autocomplete="url"/></label>
+    <label>Publishable key<input id="onlineKey" placeholder="sb_publishable_... or anon JWT" autocomplete="off"/></label>
+    <button id="onlineSaveConfig" type="button">Use these public connection details</button>
+  </div>
+  <div id="onlineControls">
+   <div class="online-grid">
+    <div><h3>Host a game</h3><label>Your display name<input id="onlineHostName" maxlength="32" value="Player 1"/></label><p class="muted">Kingdom and human counts come from the setup screen behind this window.</p><button id="onlineCreate" class="primary" type="button">Create room</button></div>
+    <div><h3>Join a game</h3><label>Room code<input id="onlineJoinCode" maxlength="8" autocapitalize="characters" placeholder="ABCD234"/></label><label>Your display name<input id="onlineJoinName" maxlength="32" value="Player 2"/></label><button id="onlineJoin" type="button">Join room</button></div>
+   </div>
+  </div>
+  <button id="skLobbyScores" type="button" style="width:100%;margin-top:6px">🏆 View worldwide Top 10</button>
+  <div id="onlineLobby" hidden>
+    <p>Share this code with your friends:</p><div id="onlineRoomCode"></div>
+    <button id="onlineCopyInvite" type="button">Copy invite link</button>
+    <p id="onlinePlayerList"></p><p class="muted">Guests open the link, choose a name, and join. Your game begins when the host presses Start.</p>
+    <button id="onlineStart" class="primary" type="button" hidden>Start online game</button>
+  </div>
+  <p id="onlineError" role="alert"></p><div class="cover-actions"><button id="onlineClose" type="button">Back / play locally instead</button></div>
+ </div>
+</div>
+<div id="onlineBanner" hidden><span id="onlineBannerText"></span><button id="onlineLeaderboards" type="button">🏆 Top 10</button><button id="onlineLeave" type="button">Leave online view</button></div>
+
+
+<div id="skLeaderboards" hidden role="dialog" aria-modal="true" aria-labelledby="skLbTitle">
+ <div class="sk-lb-dialog">
+  <div class="sk-lb-header"><h2 id="skLbTitle">🏆 Stable Kingdoms — Worldwide Top 10</h2><button id="skLbClose" type="button">Close ✕</button></div>
+  <p class="muted">Three rankings • 10 places each • Scroll sideways on your phone to see all 30 places.</p>
+  <div class="sk-lb-scroll" id="skLbBoard"><p>Loading...</p></div>
+  <p id="skLbStatus" role="status" class="muted"></p>
+ </div>
+</div>
+<div id="skScoreEntry" hidden role="dialog" aria-modal="true" aria-labelledby="skScoreTitle">
+ <div class="sk-lb-entrydialog">
+  <h2 id="skScoreTitle">🏆 You've made a worldwide Top 10!</h2>
+  <p id="skScoreQualification"></p>
+  <label>Name for the high score boards<input id="skScoreName" maxlength="32" autocomplete="nickname" placeholder="Your name"/></label>
+  <p class="muted">One submission per player per completed online game. Your verified final scores are saved for Overall, World and Personal.</p>
+  <p id="skScoreError" class="sk-lb-message" role="status"></p>
+  <button id="skScoreSave" class="primary" type="button">Save my score</button>
+  <button id="skScoreLater" type="button">Later</button>
+ </div>
+</div>
+<div id="passCover" class="game-cover" hidden role="dialog" aria-modal="true" aria-labelledby="passTitle"><div class="cover-card" style="text-align:center">
+ <span class="eyebrow">Pass the device</span><h2 id="passTitle">Next player's turn</h2><p>Hand the phone to the next player without revealing their cards or secret objectives.</p>
+ <button class="primary" id="readyForTurn" style="width:100%;margin-top:16px;min-height:58px">I'm ready — reveal my turn</button>
+ </div></div>
+<div class="wrap">
+<header class="top"><div><span class="eyebrow">A game of crowns & connections</span><h1>STABLE KINGDOMS</h1></div><div><button id="skLeaderboardButton" type="button">🏆 Worldwide Top 10</button><button id="new">New game</button></div></header>
+<div class="overview"><div id="status" class="panel" role="status" aria-live="polite"></div><div id="worldScore" class="panel scorebox"></div></div>
+<div class="table-tools"><button id="liveLedgerToggle" aria-expanded="true">Hide current turn</button><button id="ledgerToggle">Turn ledger</button><details><summary>Card legend</summary><div class="legend"><span>💗 Attractiveness</span><span>💪 Strength</span><span>🧠 Wisdom</span><span>💰 Treasure</span><span>👪 Heritage</span><span>🏰 Allegiance</span><span>🌬️ 🔥 🍀 💧 Player seat colors</span></div></details><label><input id="dragEnabled" type="checkbox"> Drag cards</label></div>
+<section id="liveTurnLedger" class="panel live-turn-ledger" aria-label="Current turn actions" aria-live="polite"></section>
+ <div id="ledger" class="panel ledger" hidden></div>
+<section id="botActivity" class="panel" aria-live="polite" hidden></section>
+<nav id="kingdomTabs" class="kingdom-tabs" role="tablist" aria-label="Kingdoms"></nav>
+<section id="kingdoms" role="tabpanel" tabindex="0"></section>
+<section class="public-area"><div class="section-heading"><div><span class="eyebrow">The shared table</span><h2>Bachelor area</h2></div><button id="singleTarget" hidden>Play selected card here</button></div><div id="bachelors"></div></section>
+<section id="inspection" class="panel" hidden></section>
+<details class="private-notes"><summary>Your secret VP characters</summary><div id="privateTracker"></div></details>
+</div>
+<section class="turn-dock" aria-label="Your hand and turn controls"><section id="preferencePanel" class="preference-panel" aria-label="Character preferences" hidden></section><div class="dock-inner"><div class="dock-toggle-bar"><strong id="dockSummary">Turn 1</strong><label><input type="checkbox" id="showMovesToggle" checked> Show turn moves</label><label><input type="checkbox" id="showHandToggle" checked> Show hand</label></div><div class="dock-content" id="turnContent"><div class="turn-heading"><h2 id="prompt"></h2><button id="clearSelection" hidden>Clear selection</button></div><p id="selectionHint"></p><div id="choices" class="choices"></div></div><div class="dock-content" id="handContent"><div class="hand-heading"><b id="handTitle">Your hand</b><span class="muted">Tap a card, then a highlighted target</span></div><div id="hand" class="hand"></div></div></div></section>
+<script type="text/x-sk-source">
+window.addEventListener('error',e=>{
+  const old=document.getElementById('runtime-error');
+  if(old)return;
+  const d=document.createElement('div');d.id='runtime-error';
+  d.style.cssText='margin:12px;padding:12px;border:2px solid #a00;background:#fee;color:#700;border-radius:8px;white-space:pre-wrap';
+  d.textContent='JavaScript error: '+(e.message||'Unknown error');
+  document.body.prepend(d);
+});
+
+class RNG {
+  constructor(seed=1){ this.s=(seed>>>0)||1; }
+  next(){ let x=this.s; x^=x<<13; x^=x>>>17; x^=x<<5; this.s=x>>>0; return this.s/4294967296; }
+  int(a,b){ return a+Math.floor(this.next()*(b-a+1)); }
+  pick(a){ return a[Math.floor(this.next()*a.length)]; }
+  shuffle(a){ for(let i=a.length-1;i>0;i--){const j=this.int(0,i);[a[i],a[j]]=[a[j],a[i]];} return a; }
+}
+const ALL_KINGDOMS=["A","B","C","D"];
+let KS=ALL_KINGDOMS.slice();
+let setupHumanNames=["Player 1"];
+let setupKingdomCount=4;
+const TRAITS=["A","S","W","T","dA","dS","dW","dT"];
+const NAMES={
+ A:{M:["Marcus","Lucius","Gaius","Titus","Quintus","Publius","Decimus","Tiberius","Aulus","Gnaeus"],F:["Livia","Julia","Claudia","Cornelia","Octavia","Flavia","Antonia","Aemilia","Valeria","Tullia"]},
+ B:{M:["Alexios","Konstantinos","Nikephoros","Ioannes","Basileios","Romanos","Manuel","Andronikos","Michael","Theodoros"],F:["Theodora","Anna","Zoe","Eudokia","Irene","Maria","Helena","Sophia","Theophano","Kassiane"]},
+ C:{M:["Vladimir","Yaroslav","Oleg","Igor","Mstislav","Sviatopolk","Rostislav","Boris","Gleb","Vsevolod"],F:["Ludmila","Olga","Rogneda","Miroslava","Dobrava","Zvenislava","Predslava","Milena","Vesna","Dragana"]},
+ D:{M:["Conan","Cormac","Niall","Aed","Brian","Fergus"],F:["Aoife","Mor","Sadb","Orlaith","Muirenn","Una"]}
+};
+// --- Culture portrait test: Kingdom A Roman / Latin, Kingdom B Byzantine Greek, Kingdom C Slavic ---
+const ROMAN_PORTRAIT_DATA=window.__skPortraitAssets.ROMAN_PORTRAIT_DATA;
+const BYZANTINE_PORTRAIT_DATA=window.__skPortraitAssets.BYZANTINE_PORTRAIT_DATA;
+const SLAVIC_PORTRAIT_DATA=window.__skPortraitAssets.SLAVIC_PORTRAIT_DATA;
+const CULTURE_PORTRAIT_CONFIG={
+ A:{slug:"roman",label:"Roman / Latin",tag:"🏛️ Roman/Latin",data:ROMAN_PORTRAIT_DATA},
+ B:{slug:"byzantine",label:"Byzantine Greek",tag:"☦️ Byzantine Greek",data:BYZANTINE_PORTRAIT_DATA},
+ C:{slug:"slavic",label:"Slavic",tag:"🛡️ Slavic",data:SLAVIC_PORTRAIT_DATA}
+};
+function portraitTier(score){
+ const n=Number(score);
+ if(n<=200)return "very_low";
+ if(n<=500)return "low";
+ if(n<=800)return "medium";
+ return "high";
+}
+function portraitPoolIds(slug,sex,tier){
+ const prefix=`${slug}_${sex==="M"?"m":"f"}_${tier}_`;
+ return Array.from({length:10},(_,i)=>prefix+String(i+1).padStart(2,"0"));
+}
+function freshPortraitCycle(g,ids,lastUsedId=null){
+ const q=g.r.shuffle(ids.slice());
+ if(lastUsedId&&q.length>1&&q[0]===lastUsedId){
+   const j=g.r.int(1,q.length-1);[q[0],q[j]]=[q[j],q[0]];
+ }
+ return q;
+}
+function assignCulturePortrait(g,x){
+ const cfg=x?CULTURE_PORTRAIT_CONFIG[x.heritage]:null;
+ if(!x||!cfg||x.portraitId)return;
+ const tier=portraitTier(x.A), key=`${cfg.slug}|${x.sex}|${tier}`, ids=portraitPoolIds(cfg.slug,x.sex,tier);
+ let pool=g.portraitBags[key];
+ if(!pool) pool=g.portraitBags[key]={queue:freshPortraitCycle(g,ids),lastUsedId:null,completedCycles:0};
+ if(pool.queue.length===0){pool.completedCycles++;pool.queue=freshPortraitCycle(g,ids,pool.lastUsedId)}
+ x.culture=cfg.slug;x.portraitTier=tier;x.portraitId=pool.queue.shift();pool.lastUsedId=x.portraitId;
+}
+function isCrownedPerson(x){
+ if(typeof g==="undefined"||!g||!g.kingdoms)return false;
+ return Object.values(g.kingdoms).some(K=>K.royals&&K.royals.people.includes(x));
+}
+function culturePortraitHTML(x){
+ if(!x?.portraitId)return "";
+ const cfg=CULTURE_PORTRAIT_CONFIG[x.heritage];if(!cfg)return "";
+ const pair=cfg.data[x.portraitId];if(!pair)return "";
+ const src=isCrownedPerson(x)?pair.crowned:pair.uncrowned;
+ return `<img class="culturePortrait" src="${src}" alt="${x.name} portrait">`;
+}
+function personCultureTagHTML(x){
+ const cfg=x?CULTURE_PORTRAIT_CONFIG[x.heritage]:null;
+ return cfg?` <span class=cultureTag>${cfg.tag}</span>`:"";
+}
+function kingdomCultureTagHTML(k){
+ const cfg=CULTURE_PORTRAIT_CONFIG[k];
+ return cfg?` <span class=cultureTag>${cfg.tag.replace('/',' / ')}</span>`:"";
+}
+// --- end culture portrait test ---
+
+const IRREG=["bimodal","bimodalLow","bimodalHigh","bimodalClose","bimodalWide",
+"trimodal","skewLow","skewHigh","strongSkewLow","strongSkewHigh",
+"heavy","light","flat","lowOut","highOut"];
+const normal=r=>{let u=1-r.next(),v=1-r.next();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+const sdRoll=r=>{let q=r.next();return q<.75?r.int(1,29):q<.95?r.int(30,69):r.int(70,100)};
+function raw(r,m,s,shape){
+ const z=normal(r),sg=r.next()<.5?-1:1;
+ // Constants are chosen so each unbounded generator is centered on m and has
+ // approximately standard deviation s. Boundary rejection can slightly shift
+ // realized moments near 1/999, which is intentional because values are never clamped.
+ switch(shape){
+  case"bimodal":return m+s*(sg*.90+normal(r)*Math.sqrt(1-.90*.90));
+  case"bimodalLow":{ // unequal peaks, low mode heavier; recentered/rescaled
+    const q=r.next()<.70?-1:1, mu=-.4, sd=Math.sqrt(1-.16);
+    return m+s*((q-mu)/sd*.78+normal(r)*.6258);
+  }
+  case"bimodalHigh":{
+    const q=r.next()<.30?-1:1, mu=.4, sd=Math.sqrt(1-.16);
+    return m+s*((q-mu)/sd*.78+normal(r)*.6258);
+  }
+  case"bimodalClose":return m+s*(sg*.45+normal(r)*Math.sqrt(1-.45*.45));
+  case"bimodalWide":return m+s*(sg*.94+normal(r)*Math.sqrt(1-.94*.94));
+  case"trimodal":return m+s*(r.pick([-1,0,1])*Math.sqrt(1.5)+normal(r)*.25)/Math.sqrt(1.0625);
+  case"skewLow":return m+s*(-Math.abs(z)+Math.sqrt(2/Math.PI))/Math.sqrt(1-2/Math.PI);
+  case"skewHigh":return m+s*(Math.abs(z)-Math.sqrt(2/Math.PI))/Math.sqrt(1-2/Math.PI);
+  case"strongSkewLow":{let e=-Math.log(1-r.next());return m+s*(1-e);}
+  case"strongSkewHigh":{let e=-Math.log(1-r.next());return m+s*(e-1);}
+  case"heavy":{let scale=r.next()<.12?2.4:.65;return m+s*z*scale/Math.sqrt(.12*2.4*2.4+.88*.65*.65);}
+  case"light":{let c=Math.max(-1.35,Math.min(1.35,z));return m+s*c/.845;} // approx normalization
+  case"flat":return m+(r.next()*2-1)*s*Math.sqrt(3);
+  case"lowOut":{let out=r.next()<.10, v=out?-Math.abs(z)*2.7:z*.72; return m+s*(v+.1576)/1.104;}
+  case"highOut":{let out=r.next()<.10, v=out?Math.abs(z)*2.7:z*.72; return m+s*(v-.1576)/1.104;}
+  default:return m+z*s;
+ }
+}
+function bounded(r,p){for(let i=0;i<10000;i++){let x=Math.round(p.shape==="normal"?p.mean+normal(r)*p.sd:raw(r,p.mean,p.sd,p.shape));if(x>=1&&x<=999)return x;}throw Error("bounded sample failed");}
+function profiles(r){
+ const p={M:{},F:{}};
+ for(const t of TRAITS){
+  const mm=r.int(100,888), ms=sdRoll(r);
+  p.M[t]={mean:mm,sd:ms,shape:r.next()<.6?"normal":r.pick(IRREG)};
+  let fs;if(r.next()<.5)fs=ms;else do{fs=sdRoll(r)}while(fs===ms);
+  let mode=r.int(0,4),fm=mm;
+  if(mode===4) fm=r.int(100,888);
+  else if(mode>0){
+    const mult=mode===1?1:mode===2?.5:2;
+    // The sex-mean relationship is itself rerolled if it would put the
+    // underlying population mean outside the legal 1..999 trait domain.
+    // Character samples are still rejection-sampled; they are never clamped.
+    do { fm=mm+(r.next()<.5?-1:1)*mult*ms; } while(fm<1||fm>999);
+  }
+  p.F[t]={mean:fm,sd:fs,shape:r.next()<.6?"normal":r.pick(IRREG)};
+ }
+ return p;
+}
+const attraction=(x,y)=>y.A+x.dA*y.A/1000+x.dS*y.S/1000+x.dW*y.W/1000+x.dT*y.T/1000;
+const cT=c=>c.people.reduce((s,x)=>s+x.T,0), cS=c=>c.people.reduce((s,x)=>s+x.S,0), names=c=>c.people.map(x=>x.name).join(" & ");
+function couple(g,a,b,status="proposed",owner=null){return{id:`C${g.uid++}`,people:[a,b],status,owner,createdTurn:g.turn,pietyOwner:null,kingdom:null,column:null,depth:null,exhausted:false};}
+function end(g,why){if(!g.ended){g.ended=true;g.endReason=why;g.log.push(`GAME OVER: ${why}`);}}
+function draw(g,k,sex=null){
+ const K=g.kingdoms[k]; if(K.remaining<=0){end(g,`Kingdom ${k} exhausted`);return null;}
+ sex=sex||(g.r.next()<K.maleRatio?"M":"F");
+ const base=g.r.pick(NAMES[k][sex]), n=(K.nameCount[base]||0)+1;K.nameCount[base]=n;
+ const name=n===1?base:n===2?`${base} the Younger`:`${base} ${n}`;
+ const x={id:`P${g.uid++}`,name,sex,heritage:k,allegiance:k,status:"alive",playedBy:null,secretVP:null,secretOwner:null};
+ for(const t of TRAITS)x[t]=bounded(g.r,K.profiles[sex][t]);
+ assignCulturePortrait(g,x);
+ K.remaining--; if(K.remaining===0)end(g,`Kingdom ${k} exhausted`);
+ return x;
+}
+function createGame(seed=1){
+ const r=new RNG(seed),g={r,seed,uid:1,turn:0,active:0,ended:false,endReason:null,log:[],kingdoms:{},players:[],bachelors:[],proposals:[],portraitBags:{},turnWar:false,turnDivorce:false,firstWar:null,firstDivorce:null,peaceTurns:0,noDivorceTurns:0,peaceClockStarted:false,initialWarCrisis:false,firstPostCrisisWar:null,turnsBeforeFirstPlayerWar:0,firstPlayerWarSeen:false,trace:[],stats:{
+ proposals:0,proposalChallenges:0,successfulProposalChallenges:0,
+ matured:0,divorces:0,battles:0,retreats:0,royalDeaths:0,successions:0,
+ pietyDeployed:0,pietyReturned:0,secretReveals:0,
+ optionalUsed:0,optionalPairs:0,optionalChallenges:0,
+ maxBachelors:0,maxProposals:0,maxCoffers:{A:0,B:0,C:0,D:0},
+ maxHatred:0,warTurns:0,divorceTurns:0
+}};
+ for(const k of KS){let mr;do{mr=.5+normal(r)*.05}while(mr<.35||mr>.65);g.kingdoms[k]={id:k,remaining:200,maleRatio:mr,profiles:profiles(r),nameCount:{},royals:null,branches:[[],[],[]],coffers:0,dead:[],divorced:[],hatred:{A:-1000,B:-1000,C:-1000,D:-1000}};}
+ for(const k of KS){let a=draw(g,k,"M"),b=draw(g,k,"F");g.kingdoms[k].royals=couple(g,a,b,"established",null);g.kingdoms[k].royals.kingdom=k;}
+ for(const k of KS){let b=draw(g,k);b.location="bachelor";g.bachelors.push(b);}
+ let setup=[];for(const k of KS)setup.push(draw(g,k),draw(g,k));r.shuffle(setup);const secrets=r.shuffle(KS.slice());
+ for(let i=0;i<KS.length;i++)g.players.push({id:i,name:`Bot ${i+1}`,bot:true,hand:[setup.pop(),setup.pop()],piety:[1,2,3],secretKingdom:secrets[i],secretRevealed:false,vpSlots:[5,12,20,25,33,40],assignments:[]});
+ // Initial-war scoring grace: setup wars are inherited crises, not player-caused failures.
+ const initialPositive=KS.some(a=>KS.some(b=>a!==b && warScore(g,a,b)!==null && warScore(g,a,b)>0));
+ g.initialWarCrisis=initialPositive;
+ g.peaceClockStarted=!initialPositive;
+ return g;
+}
+function established(K){return [...(K.royals?[K.royals]:[]),...K.branches.flat()];}
+function totals(K){
+ const cs=established(K);if(!cs.length)return{count:0,meanS:0,meanT:0,totalT:0};
+ const livingT=cs.reduce((s,c)=>s+cT(c),0);
+ return{count:cs.length,meanS:cs.reduce((s,c)=>s+cS(c),0)/cs.length,meanT:(livingT+K.coffers)/cs.length,totalT:livingT+K.coffers};
+}
+const royalW=K=>K.royals?K.royals.people.reduce((s,x)=>s+x.W,0):0;
+// Column 2 is simultaneously Church (Piety loyalty) and Government (diplomacy).
+// Each Piety marriage in Column 2 provides its priest + priestess's total wisdom
+// as a bonus to OTHER marriages of the SAME piety owner inside that kingdom.
+function churchWisdom(K,owner){
+  return owner===null||owner===undefined?0:K.branches[1].reduce((sum,c)=>sum+(c.pietyOwner===owner?coupleWisdom(c):0),0);
+}
+function pietyLeaveBonus(K,c,x){
+  return c.pietyOwner===null?0:x.W+0.2*churchWisdom(K,c.pietyOwner);
+}
+function governmentStats(K){
+  const people=K.branches[1].flatMap(c=>c.people);
+  const wisdom=people.reduce((s,x)=>s+x.W,0),treasure=people.reduce((s,x)=>s+x.T,0);
+  return {wisdom,treasure,peace:0.2*wisdom,aggression:0.2*treasure};
+}
+// An individual with the attacker's heritage serving in the DEFENDER's
+// Government reduces the attacker's desire to attack that defender. Piety
+// doubles that individual contribution, regardless of their Piety owner.
+function governmentDeterrence(defender,attackerHeritage){
+  return defender.branches[1].reduce((sum,c)=>sum+c.people.reduce((s,x)=>s+(x.heritage===attackerHeritage?0.2*x.W*(c.pietyOwner===null?1:2):0),0),0);
+}
+function warParts(g,a,b){
+  const A=g.kingdoms[a],B=g.kingdoms[b],ta=totals(A),tb=totals(B);
+  if(!ta.count||!tb.count)return null;
+  const gov=governmentStats(A);
+  const base=ta.meanS+tb.meanT-tb.meanS-ta.meanT-royalW(A)+A.hatred[b];
+  const govPeace=gov.peace,govAggression=gov.aggression,foreignDeterrence=governmentDeterrence(B,a);
+  return {base,govPeace,govAggression,foreignDeterrence,score:base-govPeace+govAggression-foreignDeterrence};
+}
+function warScore(g,a,b){return warParts(g,a,b)?.score??null;}
+// Bank: add 10% of the sum of treasure and wisdom for Column 3 marriages,
+// divided by TOTAL players. Mercantile: each qualifying foreign Kingdom B
+// receives ONE matching bonus from our Bank when its Column 3 contains at least
+// one person born with our Kingdom's heritage. This does not cost our Bank.
+function bankIncome(K,count){
+  return K.branches[2].reduce((sum,c)=>sum+0.10*(cT(c)+coupleWisdom(c))/count,0);
+}
+function incomeProjection(g){
+  const count=g.players.length||1;
+  const direct=Object.fromEntries(KS.map(k=>[k,bankIncome(g.kingdoms[k],count)]));
+  const outside=Object.fromEntries(KS.map(k=>[k,0]));
+  const links=[];
+  for(const from of KS)for(const to of KS){
+    if(from===to || direct[from]===0)continue;
+    const recipient=g.kingdoms[to];
+    if(recipient.branches[2].some(c=>c.people.some(x=>x.heritage===from))){
+      outside[to]+=direct[from];links.push({from,to,amount:direct[from]});
+    }
+  }
+  return {direct,outside,links};
+}
+function payDepartmentIncome(g){
+  const income=incomeProjection(g);
+  for(const k of KS){
+    const delta=income.direct[k]+income.outside[k];
+    if(delta>0){g.kingdoms[k].coffers+=delta;g.turnEvents=g.turnEvents||[];
+      g.turnEvents.push(`🏦 Kingdom ${k} earns ${income.direct[k].toFixed(2)} from Bank and ${income.outside[k].toFixed(2)} from Mercantile this turn.`);}
+  }
+  return income;
+}
+// UI-only war alerts: below -1000 is safe; -1000..-101 warning;
+// -100..0 SOS; positive war. These labels do NOT change battle eligibility.
+function warAlertLevel(x){return x===null||!Number.isFinite(x)?0:x>0?3:x>=-100?2:x>=-1000?1:0;}
+function warWarning(x){return ["none","⚠️","🆘️","⚔️"][warAlertLevel(x)];}
+// The attacking and defending kingdoms should both display an active-war alert.
+function kingdomWarLevel(state,k){
+ let level=0;
+ for(const other of KS){
+  if(other===k)continue;
+  level=Math.max(level,warAlertLevel(warScore(state,k,other)),warAlertLevel(warScore(state,other,k)));
+ }
+ return level;
+}
+function warStatusClass(level){return level===3?'war-active':level>0?'war-warning':'';}
+function warStatusLabel(level){return ["","⚠️ Warning","🆘️ Alert","⚔️ At war"][level];}
+function returnPiety(g,c){
+ if(c.pietyOwner===null)return;g.stats.pietyReturned++;const p=g.players[c.pietyOwner];p.piety.push(1);c.pietyOwner=null;
+ while(p.hand.length+p.piety.length>5&&p.hand.length){const i=g.r.int(0,p.hand.length-1),[d]=p.hand.splice(i,1);g.log.push(`${p.name} discarded ${d.name} when Piety returned.`);}
+}
+function revealSecret(g,p){if(!p.secretRevealed&&p.piety.length===0){p.secretRevealed=true;g.stats.secretReveals++;g.log.push(`${p.name}'s secret kingdom is now revealed privately.`);}}
+function proposal(g,p,a,b,allowPiety){
+ g.bachelors=g.bachelors.filter(x=>x!==a&&x!==b);const c=couple(g,a,b,"proposed",p.id);
+ if(allowPiety&&p.piety.length){p.piety.pop();c.pietyOwner=p.id;revealSecret(g,p);}
+ g.proposals.push(c);g.stats.proposals++;if(allowPiety&&c.pietyOwner!==null)g.stats.pietyDeployed++;return c;
+}
+function challenge(g,p,ch,q,target,allowPiety=false){g.stats.proposalChallenges++;
+ const partner=q.people.find(x=>x!==target),need=attraction(target,partner)+(q.pietyOwner!==null?target.W:0),offer=attraction(target,ch);
+ if(offer>need||(offer===need&&g.r.next()<.5)){
+  g.stats.successfulProposalChallenges++;returnPiety(g,q);g.proposals=g.proposals.filter(x=>x!==q);partner.location="bachelor";g.bachelors.push(partner);g.bachelors=g.bachelors.filter(x=>x!==ch);proposal(g,p,ch,target,allowPiety);return true;
+ }return false;
+}
+function proposalChallengeCanSucceed(g,ch,q,target){
+ const partner=q.people.find(x=>x!==target);
+ const current=attraction(target,partner)+(q.pietyOwner!==null?target.W:0);
+ const challenger=attraction(target,ch);
+ // A strictly worse challenger is not a legal choice. Exact ties remain legal because ties are resolved randomly.
+ return challenger>=current;
+}
+function mandatoryMoves(g,p){
+ let m=[];for(const c of p.hand){m.push({t:"single",c});for(const b of g.bachelors)if(b.sex!==c.sex)m.push({t:"proposal",c,b});for(const q of g.proposals)for(const target of q.people)if(target.sex!==c.sex&&proposalChallengeCanSucceed(g,c,q,target))m.push({t:"challenge",c,q,target});}return m;
+}
+function mandatory(g,p,m,autoPiety=true){
+ p.hand=p.hand.filter(x=>x!==m.c);m.c.playedBy=p.id;
+ if(m.t==="single"){m.c.location="bachelor";g.bachelors.push(m.c);}
+ else if(m.t==="proposal")proposal(g,p,m.c,m.b,autoPiety);
+ else {m.c.location="bachelor";g.bachelors.push(m.c);challenge(g,p,m.c,m.q,m.target,autoPiety);}
+ if(p.bot&&p.vpSlots.length&&g.r.next()<Math.min(1,(1+g.turn)/100)){const i=g.r.int(0,p.vpSlots.length-1),vp=p.vpSlots.splice(i,1)[0];m.c.secretOwner=p.id;m.c.secretVP=vp;p.assignments.push([m.c.id,vp]);}
+}
+function optionalMoves(g){let m=[];for(let i=0;i<g.bachelors.length;i++)for(let j=i+1;j<g.bachelors.length;j++)if(g.bachelors[i].sex!==g.bachelors[j].sex)m.push({t:"pair",a:g.bachelors[i],b:g.bachelors[j]});for(const s of g.bachelors)for(const q of g.proposals)for(const target of q.people)if(s.sex!==target.sex&&proposalChallengeCanSucceed(g,s,q,target))m.push({t:"challenge",s,q,target});return m;}
+function optional(g,p,m){g.stats.optionalUsed++;if(m.t==="pair"){g.stats.optionalPairs++;proposal(g,p,m.a,m.b,false);}else{g.stats.optionalChallenges++;challenge(g,p,m.s,m.q,m.target,false);}}
+function topOpen(K){return K.branches.map((b,i)=>b.length?null:i).filter(x=>x!==null);}
+function establish(g,c,p,kingdomChoice=null,columnChoice=null){
+ const choices=[...new Set(c.people.map(x=>x.heritage))],k=kingdomChoice&&choices.includes(kingdomChoice)?kingdomChoice:(p.bot?g.r.pick(choices):choices[0]),K=g.kingdoms[k];
+ g.stats.matured++;c.status="established";c.kingdom=k;c.people.forEach(x=>x.allegiance=k);
+ if(!K.royals){K.royals=c;c.column=null;c.depth=null;return;}
+ const opens=topOpen(K),col=opens.length?(columnChoice!==null&&opens.includes(columnChoice)?columnChoice:(p.bot?g.r.pick(opens):opens[0])):(columnChoice!==null&&[0,1,2].includes(columnChoice)?columnChoice:(p.bot?g.r.int(0,2):0));
+ K.branches[col].push(c);c.column=col;c.depth=K.branches[col].length;
+}
+function mature(g,p){for(const c of g.proposals.filter(x=>x.owner===p.id&&x.createdTurn<g.turn)){establish(g,c,p);g.proposals=g.proposals.filter(x=>x!==c);}}
+function exposed(K,c){
+ if(K.royals===c)return false;if(c.column===0||c.column===2)return true;
+ const d=c.depth-1;if(d===K.branches[1].length-1)return true;
+ return !(K.branches[0][d]&&K.branches[2][d]);
+}
+function rankLevel(K,c){if(K.royals===c)return "royal";if(c&&c.depth===1)return "prince";return "duke";}
+function establishedRomanticVision(K,from,to){
+ if(!from||!to||from===to)return false;
+ const a=rankLevel(K,from),b=rankLevel(K,to);
+ // Crown and Prince level always have reciprocal romantic vision inside their kingdom.
+ if((a==="royal"&&b==="prince")||(a==="prince"&&b==="royal"))return true;
+ // Prince level can look down into the Duke/Duchess level. The Duke reacts if pursued.
+ if(a==="prince"&&b==="duke")return true;
+ return false;
+}
+function canSeeBachelor(K,c,noble,b){
+ // Crown never sees the Bachelor Area. Princes/Dukes must be uncloistered and share Heritage
+ // with the Bachelor through either their own Heritage or current Allegiance kingdom.
+ if(K.royals===c||!exposed(K,c))return false;
+ return b.heritage===noble.heritage||b.heritage===noble.allegiance;
+}
+function canSeePublicProposal(K,c){
+ // Every uncloistered Prince/Duke sees every public proposal regardless of Heritage.
+ return K.royals!==c&&exposed(K,c);
+}
+function order(g){
+ return Object.values(g.kingdoms).sort((a,b)=>totals(b).totalT-totals(a).totalT||royalW(b)-royalW(a)||a.id.localeCompare(b.id)).flatMap(K=>{
+  let out=[],mx=Math.max(0,...K.branches.map(x=>x.length));for(let d=mx;d>=1;d--)for(let col=0;col<3;col++){let c=K.branches[col][d-1];if(c)out.push([K,c]);}return out;
+ });
+}
+function bestSingle(g,s,noble){
+ const others=g.bachelors.filter(x=>x!==s&&x.sex!==s.sex),nv=attraction(s,noble);let best=others.length?Math.max(...others.map(x=>attraction(s,x))):-Infinity;
+ if(nv>best)return true;if(nv<best)return false;return g.r.next()<1/(1+others.filter(x=>attraction(s,x)===best).length);
+}
+function remove(K,c){if(K.royals===c){K.royals=null;return;}let b=K.branches[c.column],i=b.indexOf(c);if(i>=0)b.splice(i,1);b.forEach((x,j)=>x.depth=j+1);}
+function addDivorceHatred(g,victim,perpetrators,royalVictim=false){
+ const mult=royalVictim?2:1;
+ for(const killer of perpetrators){
+  for(const from of [victim.heritage,victim.allegiance]){
+   for(const to of [killer.heritage,killer.allegiance]){
+    if(from!==to && g.kingdoms[from]) g.kingdoms[from].hatred[to]+=mult;
+   }
+  }
+ }
+}
+function divorce(g,K,x,perpetrators=[],royalVictim=false){
+ g.stats.divorces++;
+ addDivorceHatred(g,x,perpetrators,royalVictim);
+ x.status="divorced";K.divorced.push(x);K.coffers+=x.T;
+ g.turnDivorce=true;if(g.firstDivorce===null)g.firstDivorce=g.turn;
+}
+// V11 narrative ledger: an exposed observer's discovery is logged before
+// a successful romantic pursuit. These are descriptions, not new eligibility rules.
+function romanceSight(g,noble,spouse,target,area,extraPeople=[]){
+ const gender=target.sex==="M"?"man":"woman";
+ const score=attraction(noble,target).toFixed(1);
+ const former=attraction(noble,spouse).toFixed(1);
+ const info=area==="Bachelors"?"the Bachelor Area":area==="Proposals"?"the public proposal area":"the established marriages in their kingdom";
+ recordTurnAction(g,`${noble.name} notices an attractive ${gender}, ${target.name}, ${area==="Established"?"among":"in"} ${info}. Attraction to ${target.name}: ${score}; to spouse ${spouse.name}: ${former}.`,[noble,spouse,target,...extraPeople]);
+}
+function noteAbandonment(g,leaver,spouse,newPartner){
+ // A couple might separate many turns after an earlier spouse was abandoned.
+ // Record the heart-breaking reversal only for the partner who was chosen.
+ g.romanticAbandonments=g.romanticAbandonments||[];
+ const original=[...g.romanticAbandonments].reverse().find(a=>a.leaverId===spouse.id&&a.newPartnerId===leaver.id&&!a.reversalLogged);
+ if(original){
+  original.reversalLogged=true;
+  const pronoun=spouse.sex==="M"?"he":"she";
+  recordTurnAction(g,`How tragic! ${spouse.name} abandoned ${original.oldSpouseName} for ${leaver.name}, only for ${leaver.name} to abandon ${spouse.name} for ${newPartner.name}. Now ${pronoun} is permanently divorced.`,[spouse,leaver,newPartner,original.oldSpouse]);
+ }
+ g.romanticAbandonments.push({leaverId:leaver.id,oldSpouseId:spouse.id,oldSpouseName:spouse.name,oldSpouse:spouse,newPartnerId:newPartner.id,turn:g.turn,reversalLogged:false});
+}
+function pursuit(g,K,c,noble,s){
+ const spouse=c.people.find(x=>x!==noble),threshold=attraction(noble,spouse)+pietyLeaveBonus(K,c,noble);
+ if(attraction(noble,s)<=threshold||!bestSingle(g,s,noble))return false;
+ const oldCol=c.column,oldDepth=c.depth,wasRoyal=K.royals===c;
+ // The departing noble and the new partner are the perpetrators against the abandoned spouse.
+ romanceSight(g,noble,spouse,s,"Bachelors");
+ recordTurnAction(g,`💔 ${noble.name} left ${spouse.name} for ${s.name}; ${spouse.name} became permanently divorced.`,[noble,spouse,s]);
+ noteAbandonment(g,noble,spouse,s);
+ remove(K,c);divorce(g,K,spouse,[noble,s],wasRoyal);returnPiety(g,c);g.bachelors=g.bachelors.filter(x=>x!==s);
+ const nc=couple(g,noble,s,"established",null),winner=noble.W>s.W?noble:s.W>noble.W?s:g.r.pick([noble,s]),D=g.kingdoms[winner.allegiance||winner.heritage];nc.kingdom=D.id;nc.people.forEach(x=>x.allegiance=D.id);
+ if(wasRoyal){D.royals=nc;}
+ else if(D===K){K.branches[oldCol].splice(Math.min(oldDepth-1,K.branches[oldCol].length),0,nc);K.branches[oldCol].forEach((x,j)=>{x.column=oldCol;x.depth=j+1;});}
+ else {let opens=topOpen(D),col=opens.length?opens[0]:oldCol;D.branches[col].push(nc);D.branches[col].forEach((x,j)=>{x.column=col;x.depth=j+1;});}
+ return true;
+}
+function pursuitProposed(g,K,c,noble,q,target){
+ const spouse=c.people.find(x=>x!==noble);
+ const nobleNeed=attraction(noble,spouse)+pietyLeaveBonus(K,c,noble);
+ if(attraction(noble,target)<=nobleNeed)return false;
+
+ // Proposed people are public and vulnerable: every exposed D/D can see them.
+ // The target reactively compares the pursuing noble with the current proposed partner.
+ const proposedPartner=q.people.find(x=>x!==target);
+ const targetNeed=attraction(target,proposedPartner)+(q.pietyOwner!==null?target.W:0);
+ const offer=attraction(target,noble);
+ if(offer<targetNeed || (offer===targetNeed&&g.r.next()>=.5))return false;
+
+ const oldCol=c.column,oldDepth=c.depth,wasRoyal=K.royals===c;
+ // Break proposal: its abandoned partner returns single and proposal Piety returns.
+ returnPiety(g,q);g.proposals=g.proposals.filter(x=>x!==q);
+ proposedPartner.location="bachelor";g.bachelors.push(proposedPartner);
+
+ // Established spouse is the divorce victim; new pair are perpetrators.
+ romanceSight(g,noble,spouse,target,"Proposals",[proposedPartner]);
+ recordTurnAction(g,`💔 ${noble.name} left ${spouse.name} for ${target.name}; ${spouse.name} became permanently divorced.`,[noble,spouse,target]);
+ noteAbandonment(g,noble,spouse,target);
+ remove(K,c);divorce(g,K,spouse,[noble,target],wasRoyal);returnPiety(g,c);
+ const nc=couple(g,noble,target,"established",null);
+ const winner=noble.W>target.W?noble:target.W>noble.W?target:g.r.pick([noble,target]);
+ const D=g.kingdoms[winner.allegiance||winner.heritage];
+ nc.kingdom=D.id;nc.people.forEach(x=>x.allegiance=D.id);
+ if(wasRoyal)D.royals=nc;
+ else if(D===K){K.branches[oldCol].splice(Math.min(oldDepth-1,K.branches[oldCol].length),0,nc);K.branches[oldCol].forEach((x,j)=>{x.column=oldCol;x.depth=j+1;});}
+ else {let opens=topOpen(D),col=opens.length?opens[0]:oldCol;D.branches[col].push(nc);D.branches[col].forEach((x,j)=>{x.column=col;x.depth=j+1;});}
+ return true;
+}
+
+function establishedPairs(g){let out=[];for(const K of Object.values(g.kingdoms)){if(K.royals)out.push([K,K.royals]);for(const br of K.branches)for(const c of br)out.push([K,c]);}return out;}
+function placeAtFormerPosition(K,c,pos){if(pos.royal){K.royals=c;c.column=null;c.depth=null;return;}const col=pos.col,at=Math.min(pos.depth-1,K.branches[col].length);K.branches[col].splice(at,0,c);K.branches[col].forEach((x,j)=>{x.column=col;x.depth=j+1;});}
+function establishedRemarriage(g,K1,c1,n1,K2,c2,n2){
+ if(c1===c2||n1.sex===n2.sex)return false;
+ const sp1=c1.people.find(x=>x!==n1),sp2=c2.people.find(x=>x!==n2);
+ const need1=attraction(n1,sp1)+pietyLeaveBonus(K1,c1,n1),need2=attraction(n2,sp2)+pietyLeaveBonus(K2,c2,n2);
+ const a12=attraction(n1,n2),a21=attraction(n2,n1);
+ if(a12<need1||a21<need2)return false;if(a12===need1&&g.r.next()>=.5)return false;if(a21===need2&&g.r.next()>=.5)return false;
+ const r1=K1.royals===c1,r2=K2.royals===c2;if(r1&&K1!==K2)return false;if(r2&&K1!==K2)return false;
+ const pos1={royal:r1,col:c1.column,depth:c1.depth},pos2={royal:r2,col:c2.column,depth:c2.depth};
+ const anchor=n1.W>n2.W?n1:n2.W>n1.W?n2:g.r.pick([n1,n2]),D=g.kingdoms[anchor.allegiance],anchorPos=anchor===n1?pos1:pos2;
+ romanceSight(g,n1,sp1,n2,"Established",[sp2]);
+ romanceSight(g,n2,sp2,n1,"Established",[sp1]);
+ recordTurnAction(g,`💔 ${n1.name} left ${sp1.name} for ${n2.name}; ${n2.name} left ${sp2.name} for ${n1.name}. ${sp1.name} and ${sp2.name} became permanently divorced.`,[n1,sp1,n2,sp2]);
+ noteAbandonment(g,n1,sp1,n2);
+ noteAbandonment(g,n2,sp2,n1);
+ remove(K1,c1);remove(K2,c2);
+ divorce(g,K1,sp1,[n1,n2],r1);divorce(g,K2,sp2,[n1,n2],r2);returnPiety(g,c1);returnPiety(g,c2);
+ const nc=couple(g,n1,n2,"established",null);nc.kingdom=D.id;nc.people.forEach(x=>x.allegiance=D.id);
+ if(anchorPos.royal){D.royals=nc;nc.column=null;nc.depth=null;}else placeAtFormerPosition(D,nc,anchorPos);return true;
+}
+function resolveEstablishedRemarriages(g){
+ let changed=true,safety=0;while(changed&&!g.ended){if(++safety>500)throw Error("established remarriage loop");changed=false;const pairs=establishedPairs(g);
+ outer:for(const [K,c] of order(g))for(const noble of c.people){let candidates=[];
+  for(const [K2,c2] of pairs){if(c2===c||K2!==K||!establishedRomanticVision(K,c,c2))continue;
+   for(const target of c2.people)if(target.sex!==noble.sex)candidates.push({K2,c2,target,val:attraction(noble,target)});}
+  candidates.sort((a,b)=>b.val-a.val);for(const x of candidates)if(establishedRemarriage(g,K,c,noble,x.K2,x.c2,x.target)){changed=true;break outer;}
+ }}
+}
+function resolvePursuits(g){
+ let changed=true,safety=0;
+ while(changed&&!g.ended){
+  if(++safety>500)throw Error("pursuit loop");changed=false;
+  outer:for(const [K,c] of order(g)){
+   if(!exposed(K,c))continue;
+   for(const noble of c.people){
+    // Public proposed people are checked alongside singles and have no heritage/allegiance visibility restriction.
+    let proposed=[];
+    for(const q of g.proposals)for(const target of q.people)if(target.sex!==noble.sex&&canSeePublicProposal(K,c))
+      proposed.push({q,target,val:attraction(noble,target)});
+    let singles=g.bachelors
+      .filter(b=>b.sex!==noble.sex&&canSeeBachelor(K,c,noble,b))
+      .map(target=>({target,val:attraction(noble,target)}));
+    let candidates=[
+      ...proposed.map(x=>({kind:"proposed",...x})),
+      ...singles.map(x=>({kind:"single",...x}))
+    ].sort((a,b)=>b.val-a.val);
+    for(const x of candidates){
+      const ok=x.kind==="proposed"?pursuitProposed(g,K,c,noble,x.q,x.target):pursuit(g,K,c,noble,x.target);
+      if(ok){changed=true;break outer;}
+    }
+   }
+  }
+ }
+}
+// Military administration: all Column 1 marriages lend their wisdom and
+// strength to EVERY marriage fighting for the kingdom, including royalty.
+// These affect real battle scores only, never diplomatic warScore().
+function militaryBonuses(K){
+ const officers=K.branches[0];
+ const wisdom=officers.reduce((sum,c)=>sum+c.people.reduce((s,p)=>s+p.W,0),0);
+ const strength=officers.reduce((sum,c)=>sum+cS(c),0);
+ return {offense:0.2*wisdom,defense:0.1*(strength+wisdom)};
+}
+function coupleWisdom(c){return c.people.reduce((sum,p)=>sum+p.W,0);}
+function eff(K,c,attacking=false){
+ const x=cS(c);
+ const hierarchy=K.royals===c?.1*K.branches.flat().reduce((sum,z)=>sum+cS(z),0):.1*K.branches[c.column].slice(c.depth).reduce((sum,z)=>sum+cS(z),0);
+ const bonus=militaryBonuses(K);
+ return x+hierarchy+(attacking?bonus.offense:bonus.defense);
+}
+function combatants(K){
+ let out=[];if(K.royals&&topOpen(K).length&&!K.royals.exhausted)out.push(K.royals);
+ for(const c of K.branches.flat())if(exposed(K,c)&&!c.exhausted)out.push(c);return out;
+}
+function hate(g,v,killer,rank){for(const a of v.people)for(const b of killer.people)for(const from of [a.heritage,a.allegiance])for(const to of [b.heritage,b.allegiance])if(from!==to)g.kingdoms[from].hatred[to]+=rank;}
+function succession(g,K){
+ let heads=K.branches.map(b=>b[0]).filter(Boolean);if(!heads.length){K.royals=null;return;}
+ const score=c=>c.people.reduce((s,x)=>s+x.S+x.W,0), M=c=>c.people.find(x=>x.sex==="M"),F=c=>c.people.find(x=>x.sex==="F");
+ const ranked=heads.map(c=>({c,tie:g.r.next()}));
+ ranked.sort((a,b)=>score(b.c)-score(a.c)||M(b.c).W-M(a.c).W||M(b.c).S-M(a.c).S||F(b.c).W-F(a.c).W||F(b.c).S-F(a.c).S||a.tie-b.tie);
+ g.stats.successions++;let c=ranked[0].c,br=K.branches[c.column];br.shift();br.forEach((x,j)=>x.depth=j+1);c.column=null;c.depth=null;K.royals=c;
+}
+function ensureCrowns(g){for(const K of Object.values(g.kingdoms))if(!K.royals&&K.branches.some(b=>b.length))succession(g,K);}
+function kill(g,L,lc,W,wc){
+ const winnerNames=names(wc), loserNames=names(lc);
+ recordTurnAction(g,`⚔️ ${winnerNames} (${KVIS?.[W.id]?.emoji||W.id}) fought ${loserNames} (${KVIS?.[L.id]?.emoji||L.id}); ${winnerNames} won. ☠️ ${loserNames} died.`,[...wc.people,...lc.people]);
+ g.stats.battles++;const royal=L.royals===lc,loot=cT(lc)+(royal?L.coffers:0);if(royal){g.stats.royalDeaths++;L.coffers=0;}W.coffers+=loot;hate(g,lc,wc,royal?2:1);remove(L,lc);returnPiety(g,lc);lc.people.forEach(x=>{x.status="dead";L.dead.push(x);});wc.exhausted=true;g.turnWar=true;if(g.firstWar===null)g.firstWar=g.turn;if(royal){succession(g,L);L.coffers=0;}
+}
+// Central battle path shared by bot wars and human-selected fights.
+function resolveBattle(g,A,B,ac,bc){
+ g.turnEvents=g.turnEvents||[];g.warDeclarations=g.warDeclarations||new Set();
+ const dir=`${A.id}>${B.id}`;
+ if(!g.warDeclarations.has(dir)){
+  g.warDeclarations.add(dir);
+  g.turnEvents.push(`⚔️ ${KVIS?.[A.id]?.emoji||A.id} Kingdom ${A.id} declared war against ${KVIS?.[B.id]?.emoji||B.id} Kingdom ${B.id}.`);
+ }
+ let ar,br;
+ do{
+  ar=g.r.int(1,999)+eff(A,ac,true);
+  br=g.r.int(1,999)+eff(B,bc,false);
+ }while(ar===br);
+ const attackerWon=ar>br;
+ const loser=attackerWon?bc:ac, winner=attackerWon?ac:bc;
+ const margin=Math.abs(ar-br),wisdom=coupleWisdom(loser);
+ if(margin<=wisdom){
+  // The losing married couple retreats intact; the aggressor has used its
+  // one battle action this turn, whether the attacker or defender retreats.
+  ac.exhausted=true;
+  g.stats.battles++;g.stats.retreats=(g.stats.retreats||0)+1;
+  g.turnWar=true;if(g.firstWar===null)g.firstWar=g.turn;
+  const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+  recordTurnAction(g,`⚔️ ${names(ac)} (${KVIS?.[A.id]?.emoji||A.id}) battled ${names(bc)} (${KVIS?.[B.id]?.emoji||B.id}); ${names(loser)} retreated (${fmt(margin)}/${wisdom} — loss margin/wisdom). Both couples survived; attacking marriage's battle action used.`,[...ac.people,...bc.people]);
+  return {ar,br,winner,retreated:true,margin,wisdom,attackerWon};
+ }
+ if(attackerWon)kill(g,B,bc,A,ac);else kill(g,A,ac,B,bc);
+ return {ar,br,winner,retreated:false,margin,wisdom,attackerWon};
+}
+function wars(g){
+ let n=0;while(!g.ended){if(n++>500)throw Error("war loop");let opts=[];for(const a of KS)for(const b of KS)if(a!==b){let s=warScore(g,a,b);if(s!==null&&s>0){let A=g.kingdoms[a],B=g.kingdoms[b],aa=combatants(A),bb=combatants(B);if(aa.length&&bb.length)opts.push([A,B,aa,bb]);}}if(!opts.length)return;let[A,B,aa,bb]=g.r.pick(opts),ac=g.r.pick(aa),bc=g.r.pick(bb);resolveBattle(g,A,B,ac,bc);}}
+// War takes priority over any automatic relationship changes. Couples killed in a
+// battle cannot divorce/remarry later in this same turn. Romance runs exactly
+// once AFTER this turn's battles, and cannot trigger another war until next turn.
+function resolveRomanceAfterWars(g){
+ if(g.ended)return;
+ resolveEstablishedRemarriages(g);
+ if(!g.ended)resolvePursuits(g);
+ if(!g.ended)ensureCrowns(g);
+}
+function attrition(g){if(!(g.turnWar||g.turnDivorce))return;for(const K of Object.values(g.kingdoms)){K.remaining--;if(K.remaining<=0){end(g,`Kingdom ${K.id} exhausted by chaos`);return;}}}
+function redraw(g,p){let used=new Set;while(!g.ended&&p.hand.length+p.piety.length<5){let c=KS.filter(k=>!used.has(k)&&g.kingdoms[k].remaining>0);if(!c.length)return;let k=g.r.pick(c);used.add(k);let x=draw(g,k);if(x)p.hand.push(x);}}
+function botTurn(g){
+ if(g.ended)return;const __ledgerBefore=snapState(g),__ledgerActor=`${playerSymbol(g.active)} ${g.players[g.active]?.name||`P${g.active+1}`}`;g.turnEvents=[];g.turnEventRoles=[];g.warDeclarations=new Set();g.turnWar=false;g.turnDivorce=false;for(const K of Object.values(g.kingdoms))for(const c of established(K))c.exhausted=false;
+ const p=g.players[g.active];mature(g,p);let mm=mandatoryMoves(g,p);if(!mm.length){end(g,"No mandatory move");return;}mandatory(g,p,g.r.pick(mm));
+ if(g.r.next()<.5){let om=optionalMoves(g);if(om.length)optional(g,p,g.r.pick(om));}
+ ensureCrowns(g);wars(g);resolveRomanceAfterWars(g);if(!g.ended)attrition(g);if(!g.ended)redraw(g,p);if(!g.ended)payDepartmentIncome(g);
+ // Peace scoring does not begin until an inherited setup war has fully ended.
+ // Crisis turns earn 0 peace VP. The first fully peaceful turn starts the clock.
+ if(!g.peaceClockStarted){
+   const anyPositive=KS.some(a=>KS.some(b=>a!==b && warScore(g,a,b)!==null && warScore(g,a,b)>0));
+   // The turn that actually clears an inherited crisis starts the scoring clock,
+   // but does not retroactively count crisis turns.
+   if(!anyPositive && !g.turnWar) g.peaceClockStarted=true;
+ } else {
+   if(!g.turnWar){
+     g.peaceTurns++;
+     if(!g.firstPlayerWarSeen) g.turnsBeforeFirstPlayerWar++;
+   } else {
+     g.stats.warTurns++;
+     if(!g.firstPlayerWarSeen){
+       g.firstPlayerWarSeen=true;
+       g.firstPostCrisisWar=g.turn; // retained as useful historical/global turn metadata
+     }
+   }
+ }
+ if(!g.turnDivorce)g.noDivorceTurns++;else g.stats.divorceTurns++;
+ g.stats.maxBachelors=Math.max(g.stats.maxBachelors,g.bachelors.length);
+ g.stats.maxProposals=Math.max(g.stats.maxProposals,g.proposals.length);
+ for(const k of KS)g.stats.maxCoffers[k]=Math.max(g.stats.maxCoffers[k],g.kingdoms[k].coffers);
+ for(const K of Object.values(g.kingdoms))for(const v of Object.values(K.hatred))g.stats.maxHatred=Math.max(g.stats.maxHatred,v);
+ g.trace.push({
+  turn:g.turn, war:g.turnWar, divorce:g.turnDivorce,
+  battles:g.stats.battles, divorces:g.stats.divorces, royalDeaths:g.stats.royalDeaths,
+  hatredMax:g.stats.maxHatred, bachelors:g.bachelors.length, proposals:g.proposals.length,
+  marriages:Object.values(g.kingdoms).reduce((n,K)=>n+established(K).length,0),
+  coffers:Object.fromEntries(KS.map(k=>[k,g.kingdoms[k].coffers])),
+  decks:Object.fromEntries(KS.map(k=>[k,g.kingdoms[k].remaining])),
+  warScores:Object.fromEntries(KS.flatMap(a=>KS.filter(b=>b!==a).map(b=>[a+b,warScore(g,a,b)])))
+ });
+ g.turn++;g.active=(g.active+1)%g.players.length;diffTurn(__ledgerBefore,snapState(g),__ledgerActor);
+}
+
+function configurePlayers(g,humanNames=["Player 1"]){
+ const n=Math.max(1,Math.min(g.players.length,humanNames.length));
+ g.players.forEach((p,i)=>{p.bot=i>=n;p.name=i<n?(humanNames[i]||`Player ${i+1}`):`Bot ${i-n+1}`;});
+ return g;
+}
+function beginTurn(g){g.turnEvents=[];g.turnEventRoles=[];g.warDeclarations=new Set();g.turnWar=false;g.turnDivorce=false;for(const K of Object.values(g.kingdoms))for(const c of established(K))c.exhausted=false;}
+function finishTurn(g,p){
+ ensureCrowns(g);wars(g);resolveRomanceAfterWars(g);if(!g.ended)attrition(g);if(!g.ended)redraw(g,p);if(!g.ended)payDepartmentIncome(g);
+ if(!g.peaceClockStarted){const anyPositive=KS.some(a=>KS.some(b=>a!==b&&warScore(g,a,b)!==null&&warScore(g,a,b)>0));if(!anyPositive&&!g.turnWar)g.peaceClockStarted=true;}
+ else if(!g.turnWar){g.peaceTurns++;if(!g.firstPlayerWarSeen)g.turnsBeforeFirstPlayerWar++;}else{g.stats.warTurns++;if(!g.firstPlayerWarSeen){g.firstPlayerWarSeen=true;g.firstPostCrisisWar=g.turn;}}
+ if(!g.turnDivorce)g.noDivorceTurns++;else g.stats.divorceTurns++;
+ g.turn++;g.active=(g.active+1)%g.players.length;
+}
+
+function pendingMaturations(g,p){return g.proposals.filter(x=>x.owner===p.id&&x.createdTurn<g.turn);}
+function placementMoves(g,c){
+ const ks=[...new Set(c.people.map(x=>x.heritage))], out=[];
+ for(const k of ks){const K=g.kingdoms[k];
+   if(!K.royals){out.push({t:"place",c,k,royal:true});continue;}
+   const opens=topOpen(K);
+   if(opens.length)for(const col of opens)out.push({t:"place",c,k,col});
+   else for(let col=0;col<3;col++)out.push({t:"place",c,k,col});
+ } return out;
+}
+function humanPlacement(g,m){
+ const p=g.players[g.active],c=m.c;establish(g,c,p,m.k,m.royal?null:m.col);g.proposals=g.proposals.filter(x=>x!==c);
+ const more=pendingMaturations(g,p);return more.length?{phase:"placement",moves:placementMoves(g,more[0])}:{phase:"mandatory",moves:mandatoryMoves(g,p)};
+}
+function humanWarMoves(g){
+ let out=[];for(const a of KS)for(const b of KS)if(a!==b){const sc=warScore(g,a,b);if(sc!==null&&sc>0){
+  const A=g.kingdoms[a],B=g.kingdoms[b],aa=combatants(A),bb=combatants(B);
+  for(const ac of aa)for(const bc of bb)out.push({t:"war",a,b,ac,bc,score:sc});
+ }}return out;
+}
+function resolveHumanBattle(g,m){
+ return resolveBattle(g,g.kingdoms[m.a],g.kingdoms[m.b],m.ac,m.bc);
+}
+function finishHumanWarPhase(g,p){
+ resolveRomanceAfterWars(g);
+ return finalizeHumanTurn(g,p);
+}
+function afterHumanChoices(g,p){
+ // Human, just like bots: resolve eligible wars BEFORE automatic divorces.
+ ensureCrowns(g);
+ const wm=humanWarMoves(g);if(wm.length)return {phase:"war",moves:wm};
+ return finishHumanWarPhase(g,p);
+}
+function humanDrawMoves(g,p,used=[]){
+ if(g.ended||p.hand.length+p.piety.length>=5)return [];
+ return KS.filter(k=>!used.includes(k)&&g.kingdoms[k].remaining>0).map(k=>({t:"draw",k,used:[...used]}));
+}
+function humanDraw(g,m){
+ const p=g.players[g.active],x=draw(g,m.k);if(x)p.hand.push(x);
+ const used=[...(m.used||[]),m.k],next=humanDrawMoves(g,p,used);
+ if(next.length)return {phase:"draw",moves:next};
+ return finishHumanBookkeeping(g,p);
+}
+function finishHumanBookkeeping(g,p){
+ if(!g.ended)payDepartmentIncome(g);
+ if(!g.peaceClockStarted){const anyPositive=KS.some(a=>KS.some(b=>a!==b&&warScore(g,a,b)!==null&&warScore(g,a,b)>0));if(!anyPositive&&!g.turnWar)g.peaceClockStarted=true;}
+ else if(!g.turnWar){g.peaceTurns++;if(!g.firstPlayerWarSeen)g.turnsBeforeFirstPlayerWar++;}else{g.stats.warTurns++;if(!g.firstPlayerWarSeen){g.firstPlayerWarSeen=true;g.firstPostCrisisWar=g.turn;}}
+ if(!g.turnDivorce)g.noDivorceTurns++;else g.stats.divorceTurns++;
+ const __after=snapState(g);diffTurn(turnStartSnap,__after,`${playerSymbol(p.id)} ${p.name}`);g.turn++;g.active=(g.active+1)%g.players.length;return {phase:g.ended?"ended":"complete",moves:[]};
+}
+function finalizeHumanTurn(g,p){
+ if(!g.ended)attrition(g);
+ if(g.ended)return {phase:"ended",moves:[]};
+ const dm=humanDrawMoves(g,p,[]);
+ return dm.length?{phase:"draw",moves:dm}:finishHumanBookkeeping(g,p);
+}
+function humanWar(g,m){
+ resolveHumanBattle(g,m);
+ if(g.ended)return {phase:"ended",moves:[]};
+ const next=humanWarMoves(g);
+ return next.length?{phase:"war",moves:next}:finishHumanWarPhase(g,g.players[g.active]);
+}
+function startHumanTurn(g){
+ if(g.ended)return {phase:"ended"}; const p=g.players[g.active];if(p.bot)return {phase:"bot"};beginTurn(g);
+ const due=pendingMaturations(g,p);if(due.length)return {phase:"placement",moves:placementMoves(g,due[0])};
+ return {phase:"mandatory",moves:mandatoryMoves(g,p)};
+}
+function humanVPChoices(g,c){
+ const p=g.players[g.active];
+ return p.vpSlots.map(v=>({t:"vp",c,v})).concat([{t:"vpSkip",c}]);
+}
+function humanVP(g,m){
+ const p=g.players[g.active],c=m.c;
+ if(m.t==="vp"){
+   if(c.secretOwner!==null)throw Error("Character already has a Secret VP assignment");
+   const i=p.vpSlots.indexOf(m.v);if(i<0)throw Error("Secret VP marker is no longer available");
+   p.vpSlots.splice(i,1);c.secretOwner=p.id;c.secretVP=m.v;p.assignments.push([c.id,m.v]);
+ }
+ return humanPostVP(g,c);
+}
+function humanPostVP(g,c){
+ const p=g.players[g.active];
+ const created=g.proposals.find(q=>q.owner===p.id&&q.createdTurn===g.turn&&q.people.includes(c));
+ if(created&&p.piety.length)return {phase:"piety",proposal:created,moves:[]};
+ return {phase:"optional",moves:optionalMoves(g)};
+}
+function humanMandatory(g,move){
+ const p=g.players[g.active];mandatory(g,p,move,false);
+ if(p.vpSlots.length)return {phase:"vp",moves:humanVPChoices(g,move.c)};
+ return humanPostVP(g,move.c);
+}
+function humanPiety(g,attach){
+ const p=g.players[g.active];
+ if(attach&&p.piety.length){
+   const q=g.proposals.find(q=>q.owner===p.id&&q.createdTurn===g.turn&&q.pietyOwner===null);
+   if(q){p.piety.pop();q.pietyOwner=p.id;g.stats.pietyDeployed++;revealSecret(g,p);}
+ }
+ return {phase:"optional",moves:optionalMoves(g)};
+}
+function humanOptional(g,move=null){const p=g.players[g.active];if(move)optional(g,p,move);return afterHumanChoices(g,p);}
+function runBotsUntilHuman(g){let guard=0;while(!g.ended&&g.players[g.active].bot){if(guard++>20)throw Error("bot handoff loop");botTurn(g);}return g;}
+function decisionRoleEmoji(x){
+ if(!x)return "";
+ for(const K of Object.values(g.kingdoms)){
+  if(K.royals&&K.royals.people.includes(x))return "👑";
+  for(const br of K.branches){const d=br.findIndex(c=>c.people.includes(x));if(d===0)return x.sex==="M"?"🤴":"👸";if(d>0)return x.sex==="M"?"🧝‍♂️":"🧝‍♀️";}
+ }
+ if(g.proposals.some(q=>q.people.includes(x)))return "💍";
+ if(g.bachelors.includes(x))return x.sex==="M"?"👨‍🌾":"👩‍🌾";
+ const owner=g.players.find(p=>p.hand.includes(x));
+ if(owner)return x.sex==="M"?"👨‍🌾":"👩‍🌾";
+ return x.sex==="M"?"♂️":"♀️";
+}
+function decisionPerson(x,{played=false}={}){
+ if(!x)return "?";
+ const owner=x.playedBy!==null&&x.playedBy!==undefined?playerSymbol(x.playedBy):"";
+ const role=decisionRoleEmoji(x);
+ const heritage=x.heritage&&KVIS[x.heritage]?`👪${KVIS[x.heritage].emoji}`:"";
+ const allegiance=x.allegiance&&KVIS[x.allegiance]?`🏰${KVIS[x.allegiance].emoji}`:"";
+ // Hand cards have no public rank yet, so their sex uses the Bachelor/Bachelorette visual shorthand.
+ // Established characters additionally show current allegiance because it can differ from Heritage.
+ const establishedNow=Object.values(g.kingdoms).some(K=>established(K).some(c=>c.people.includes(x)));
+ return `${owner}${owner?" ":""}${x.name} ${role} ${heritage}${establishedNow&&allegiance?` ${allegiance}`:""}`.trim();
+}
+function describeMove(m){
+ const who=x=>decisionPerson(x);
+ if(m.t==="single")return `Play ${who(m.c)} → 👨‍🌾👩‍🌾 Bachelor Area`;
+ if(m.t==="proposal")return `Play ${who(m.c)} → 💍 propose to ${who(m.b)}`;
+ if(m.t==="challenge"){const q=g.proposals.find(q=>q.people.includes(m.target));const old=q?.people.find(x=>x!==m.target);return `😍 Breakup proposal for ${who(m.target)} with ${who(m.c||m.s)}${old?` · if successful, ${who(m.target)} leaves ${who(old)}`:""}`;}
+ if(m.t==="pair")return `💍 Propose ${who(m.a)} + ${who(m.b)}`;
+ if(m.t==="place")return m.royal?`👑 Establish ${who(m.c.people[0])} & ${who(m.c.people[1])} as King/Queen of Kingdom ${m.k} ${KVIS?.[m.k]?.emoji||""}`:`🏰 Place ${who(m.c.people[0])} & ${who(m.c.people[1])} in Kingdom ${m.k} ${KVIS?.[m.k]?.emoji||""}, Column ${m.col+1}`;
+ if(m.t==="vp")return `⭐ Make ${who(m.c)} my secret ${m.v}-VP character`;
+ if(m.t==="vpSkip")return `Do not assign a Secret VP marker to ${who(m.c)}`;
+ if(m.t==="draw")return `🃏 Draw from Kingdom ${m.k} ${KVIS?.[m.k]?.emoji||""} deck (${g.kingdoms[m.k].remaining} remaining)`;
+ if(m.t==="war")return `⚔️ Kingdom ${m.a} ${KVIS?.[m.a]?.emoji||""} attacks Kingdom ${m.b} ${KVIS?.[m.b]?.emoji||""}: ${who(m.ac.people[0])} & ${who(m.ac.people[1])} vs ${who(m.bc.people[0])} & ${who(m.bc.people[1])} (War Score ${Math.round(m.score)})`;
+ return m.t;
+}
+
+function scoreGame(g){
+ const totalTurns=g.turn;
+ // firstPostCrisisWar is a zero-based turn index. Therefore exactly that many
+ // scored turns occurred before the first player-era war.
+ const turnsBeforeFirstWar=g.turnsBeforeFirstPlayerWar;
+ // firstDivorce is likewise a zero-based game turn index; inherited-crisis grace
+ // applies only to war, not divorce.
+ const turnsBeforeFirstDivorce=g.firstDivorce===null ? totalTurns : g.firstDivorce;
+ const deadDivorced=Object.values(g.kingdoms).reduce((n,K)=>n+K.dead.length+K.divorced.length,0);
+ const baseWorldScore=3*turnsBeforeFirstWar + 4*g.peaceTurns
+   + 2*turnsBeforeFirstDivorce + 3*g.noDivorceTurns - deadDivorced;
+ const cofferValues=Object.values(g.kingdoms).map(K=>K.coffers);
+ const poorestCoffer=Math.min(...cofferValues), richestCoffer=Math.max(...cofferValues);
+ const equityScore=poorestCoffer-richestCoffer;
+ const worldScore=baseWorldScore+equityScore;
+
+ const players=g.players.map(p=>{
+   const K=g.kingdoms[p.secretKingdom];
+   // Secret-kingdom treasure is current total kingdom treasure. Dead/divorced
+   // personal treasure is already represented by coffers under the engine's storage model.
+   const secretKingdomTreasure=p.secretRevealed?(K.coffers+established(K).reduce((sum,c)=>sum+cT(c),0)):0;
+   let secretCharacterStatusVP=0, secretCharacterHappinessVP=0; const secretCharacterBreakdown=[];
+   for(const [id,vp] of p.assignments){
+     let person=null,partner=null,state="missing",multiplier=0;
+     for(const Q of Object.values(g.kingdoms)){let x=Q.dead.find(z=>z.id===id);if(x){person=x;state="dead";break;}x=Q.divorced.find(z=>z.id===id);if(x){person=x;state="divorced";break;}}
+     if(!person){let x=g.bachelors.find(z=>z.id===id);if(x){person=x;state="bachelor";multiplier=1;}}
+     if(!person)for(const q of g.proposals){let x=q.people.find(z=>z.id===id);if(x){person=x;partner=q.people.find(z=>z!==x);state="proposed";multiplier=2;break;}}
+     if(!person)for(const Q of Object.values(g.kingdoms)){
+       if(Q.royals){let x=Q.royals.people.find(z=>z.id===id);if(x){person=x;partner=Q.royals.people.find(z=>z!==x);state="royal";multiplier=100;break;}}
+       for(const c of Q.branches.flat()){let x=c.people.find(z=>z.id===id);if(x){person=x;partner=c.people.find(z=>z!==x);let top=Q.branches[c.column]?.[0]===c;state=top?"topDuke":"lowerDuke";multiplier=top?10:5;break;}}if(person)break;
+     }
+     // Hierarchy bonus: every Secret VP character earns +100 VP for each
+     // Duke/Duchess marriage below that character in the same column. Royals
+     // instead count every established marriage below the Crown in the kingdom.
+     let subordinateMarriages=0;
+     if(person&&state==="royal"){
+       for(const Q of Object.values(g.kingdoms))if(Q.royals&&Q.royals.people.includes(person)){
+         subordinateMarriages=Q.branches.reduce((n,col)=>n+col.length,0);
+         break;
+       }
+     }else if(person&&(state==="topDuke"||state==="lowerDuke")){
+       for(const Q of Object.values(g.kingdoms)){
+         let found=false;
+         for(let ci=0;ci<Q.branches.length&&!found;ci++){
+           const col=Q.branches[ci],idx=col.findIndex(c=>c.people.includes(person));
+           if(idx>=0){subordinateMarriages=Math.max(0,col.length-idx-1);found=true;}
+         }
+         if(found)break;
+       }
+     }
+     const hierarchyVP=100*subordinateMarriages;
+     const statusVP=vp*multiplier, happinessVP=(multiplier>0&&partner)?attraction(person,partner):0;
+     secretCharacterStatusVP+=statusVP+hierarchyVP;secretCharacterHappinessVP+=happinessVP;
+     secretCharacterBreakdown.push({id,marker:vp,state,multiplier,statusVP,hierarchyVP,subordinateMarriages,happinessVP,totalVP:statusVP+hierarchyVP+happinessVP});
+   }
+   const secretCharacterVP=secretCharacterStatusVP+secretCharacterHappinessVP;
+   const personalScore=secretKingdomTreasure+secretCharacterVP;
+   return {playerId:p.id,worldScore,secretKingdomTreasure,secretCharacterStatusVP,secretCharacterHappinessVP,
+           secretCharacterVP,secretCharacterBreakdown,personalScore,totalScore:worldScore+personalScore};
+ });
+ return {totalTurns,turnsBeforeFirstWar,turnsBeforeFirstDivorce,deadDivorced,
+         baseWorldScore,poorestCoffer,richestCoffer,equityScore,worldScore,players};
+}
+
+function simulate(seed,max=3000){let g=createGame(seed);while(!g.ended&&g.turn<max)botTurn(g);if(!g.ended)end(g,"turn cap");return g;}
+
+
+let g,phase,moves=[];const $=s=>document.querySelector(s);
+let ledgerOpen=false,expandedKingdoms=new Set(),turnLedger=[],turnStartSnap=null;
+ let liveTurn=null,liveTurnOpen=true,liveShown=Infinity,liveCaptureDepth=0;
+function professionAtAction(g,x){
+  if(!x)return '';
+  for(const K of Object.values(g.kingdoms)){
+    if(K.royals?.people.includes(x))return x.sex==='M'?'👑 King':'👑 Queen';
+    for(let i=0;i<3;i++)for(let d=0;d<K.branches[i].length;d++){
+      if(K.branches[i][d].people.includes(x))return d===0?(x.sex==='M'?'🤴 Prince':'👸 Princess'):(x.sex==='M'?'🧝‍♂️ Duke':'🧝‍♀️ Duchess');
+    }
+  }
+  if(g.proposals.some(c=>c.people.includes(x)))return '💍 Engaged';
+  if(g.bachelors.includes(x))return x.sex==='M'?'👨‍🌾 Bachelor':'👩‍🌾 Bachelorette';
+  if(g.players.some(p=>p.hand.includes(x)))return '🃏 Hand';
+  if(x.status==='dead')return '☠️ Deceased';
+  if(x.status==='divorced')return '💔 Divorced';
+  return 'Unassigned';
+}
+function recordTurnAction(g,line,people=[]){
+  g.turnEvents=g.turnEvents||[];
+  g.turnEventRoles=g.turnEventRoles||[];
+  const snapshot={};for(const person of people)if(person?.name)snapshot[person.name]=professionAtAction(g,person);
+  g.turnEvents.push(line);
+  g.turnEventRoles[g.turnEvents.length-1]=snapshot;
+}
+function snapshotProfessions(g){
+  const map={};
+  for(const K of Object.values(g.kingdoms)){
+    for(const c of established(K))for(const x of c.people)map[x.name]=professionAtAction(g,x);
+    for(const x of [...K.dead,...K.divorced])map[x.name]=professionAtAction(g,x);
+  }
+  for(const x of g.bachelors)map[x.name]=professionAtAction(g,x);
+  for(const c of g.proposals)for(const x of c.people)map[x.name]=professionAtAction(g,x);
+  for(const p of g.players)for(const x of p.hand)map[x.name]=professionAtAction(g,x);
+  return map;
+}
+function snapState(g){
+ const loc={}; for(const [k,K] of Object.entries(g.kingdoms)){loc[k]={marriages:established(K).map(c=>names(c)),royal:K.royals?names(K.royals):null,dead:K.dead.length,divorced:K.divorced.length,coffer:Math.round(K.coffers)}}
+ return {turn:g.turn,active:g.active,player:g.players[g.active]?.name||`P${g.active+1}`,loc,bachelors:g.bachelors.map(x=>x.name),proposals:g.proposals.map(c=>names(c)),battles:g.stats.battles,divorces:g.stats.divorces,successions:g.stats.successions,royalDeaths:g.stats.royalDeaths,professions:snapshotProfessions(g)};
+}
+function diffTurn(before,after,actor){
+ if(!before||!after)return; const lines=[]; const detailedBattle=(g.turnEvents||[]).some(x=>x.startsWith('⚔️')); (g.turnEvents||[]).forEach(x=>lines.push(x));
+ for(const k of KS){const a=before.loc[k],b=after.loc[k],em=KVIS[k]?.emoji||k;
+  const added=b.marriages.filter(x=>!a.marriages.includes(x)), removed=a.marriages.filter(x=>!b.marriages.includes(x));
+  const rankOf=name=>{const c=established(g.kingdoms[k]).find(c=>names(c)===name);if(!c)return '';const pair=c.people.map(x=>g.kingdoms[k].royals===c?(x.sex==='M'?'👑 King':'👑 Queen'):c.depth===1?(x.sex==='M'?'🤴 Prince':'👸 Princess'):(x.sex==='M'?'🧝‍♂️ Duke':'🧝‍♀️ Duchess')).join(' + ');return pair+(g.kingdoms[k].royals===c?'':` · C${c.column+1} depth ${c.depth}`)};
+  added.forEach(x=>lines.push(`${em} ${x} became an established marriage → ${rankOf(x)}.`)); removed.forEach(x=>lines.push(`${em} ${x} left the established hierarchy.`));
+  if(a.royal!==b.royal)lines.push(`${em} Crown changed: ${a.royal||'vacant'} → ${b.royal||'vacant'}.`);
+  if(b.dead>a.dead&&!detailedBattle)lines.push(`${em} ${b.dead-a.dead} character${b.dead-a.dead===1?'':'s'} died.`);
+  if(b.divorced>a.divorced)lines.push(`${em} ${b.divorced-a.divorced} character${b.divorced-a.divorced===1?'':'s'} became permanently divorced.`);
+  if(a.coffer!==b.coffer)lines.push(`${em} coffer ${a.coffer} → ${b.coffer}.`);
+ }
+ const pa=after.proposals.filter(x=>!before.proposals.includes(x)); const pr=before.proposals.filter(x=>!after.proposals.includes(x));
+ pa.forEach(x=>lines.push(`💍 New public proposal: ${x}.`)); pr.forEach(x=>lines.push(`💍 Proposal resolved/disrupted: ${x}.`));
+ const ba=after.bachelors.filter(x=>!before.bachelors.includes(x)); const br=before.bachelors.filter(x=>!after.bachelors.includes(x));
+ const bachelorEmoji=name=>{const pool=[...g.bachelors,...g.proposals.flatMap(q=>q.people),...Object.values(g.kingdoms).flatMap(K=>[...established(K).flatMap(c=>c.people),...K.dead,...K.divorced]),...g.players.flatMap(p=>p.hand)];const z=pool.find(y=>y.name===name);return z?.sex==='F'?'👩‍🌾':'👨‍🌾';};
+ ba.forEach(x=>lines.push(`${bachelorEmoji(x)} ${x} entered the Bachelor Area.`)); br.forEach(x=>{const q=g.proposals.find(q=>q.people.some(y=>y.name===x));let dest='';if(q){const other=q.people.find(y=>y.name!==x);dest=` → 💍 public proposal${other?` with ${other.name}`:''}`;}else{for(const [k,K] of Object.entries(g.kingdoms)){const c=established(K).find(c=>c.people.some(y=>y.name===x));if(c){dest=` → ${KVIS[k].emoji} Kingdom ${k}`;break;}}}lines.push(`${bachelorEmoji(x)} ${x} left the Bachelor Area${dest}.`)});
+ if(after.battles>before.battles&&!detailedBattle)lines.push(`⚔️ ${after.battles-before.battles} battle${after.battles-before.battles===1?'':'s'} fought.`);
+ if(after.divorces>before.divorces)lines.push(`💔 ${after.divorces-before.divorces} established divorce${after.divorces-before.divorces===1?'':'s'} occurred.`);
+ if(after.successions>before.successions)lines.push(`👑 ${after.successions-before.successions} royal succession${after.successions-before.successions===1?'':'s'} occurred.`);
+ if(!lines.length)lines.push('No public board changes.');
+ const eventIndexes=new Map();
+ const roles=lines.map(line=>{
+   let index=eventIndexes.get(line)||0;
+   const matching=(g.turnEvents||[]).map((e,i)=>e===line?i:-1).filter(i=>i>=0);
+   eventIndexes.set(line,index+1);
+   const observed=matching.length>index?(g.turnEventRoles?.[matching[index]]||{}):{};
+   const preferAfter=line.includes('became an established marriage')||line.includes('entered the Bachelor Area');
+   return {...(preferAfter?before.professions:after.professions),...(preferAfter?after.professions:before.professions),...observed};
+ });
+ turnLedger.push({turn:before.turn+1,actor,lines,roles}); if(turnLedger.length>80)turnLedger.shift();
+}
+
+function romanceFlavorOnly(line){return line.startsWith("How tragic!")||line.includes(" notices an attractive ");}
+function ledgerDecorate(line,roles={},omitProfession=false){
+ if(romanceFlavorOnly(line))return line;
+ const people=[];
+ for(const K of Object.values(g.kingdoms)){
+  for(const c of established(K))people.push(...c.people);
+  people.push(...K.dead,...K.divorced);
+ }
+ people.push(...g.bachelors);
+ for(const q of g.proposals)people.push(...q.people);
+ for(const p of g.players)people.push(...p.hand);
+ // Decorate the original text in one pass. Replacing names one by one caused
+ // duplicate emojis in overlapping names such as "Cormac" and "Cormac the Younger".
+ const tags=new Map();
+ for(const x of people){
+  if(!x?.name||tags.has(x.name))continue;
+  const tag=`${x.playedBy!==null&&x.playedBy!==undefined?playerSymbol(x.playedBy)+' ':''}${x.sex==='M'?'♂️':'♀️'} 👪${KVIS[x.heritage]?.emoji||'?'}${x.allegiance&&KVIS[x.allegiance]?` 🏰${KVIS[x.allegiance].emoji}`:''}`;
+  tags.set(x.name,tag);
+ }
+ if(!tags.size)return line;
+ const names=[...tags.keys()].sort((a,b)=>b.length-a.length).map(name=>name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+ const pattern=new RegExp(`(?<![\\p{L}\\p{N}])(?:${names.join('|')})(?![\\p{L}\\p{N}])`,'gu');
+ return line.replace(pattern,name=>`${name}${omitProfession?"":` (${roles[name]||"role unknown"})`} ${tags.get(name)}`);
+}
+function ledgerHTML(){return `<b>📝 Turn Ledger</b><div class=muted>Public history since this game began. Newest turn first.</div>${[...turnLedger].reverse().map(e=>`<div class=ledgerTurn><b>Turn ${e.turn} — ${e.actor}</b>${e.lines.map((x,i)=>`<div class=ledgerLine>• ${ledgerDecorate(x,e.roles?.[i]||{})}</div>`).join('')}</div>`).join('')||'<div class=muted style="margin-top:8px">No completed turns yet.</div>'}`}
+
+// Current turn journal is *not* the historical summary. It is built as each
+// engine action executes, with its immediate results and the original event log.
+function beginLiveTurn(game){
+  if(!game)return;
+  const n=game.turn+1,actor=`${playerSymbol(game.active)} ${game.players[game.active]?.name||`Player ${game.active+1}`}`;
+  if(!liveTurn||liveTurn.turn!==n||liveTurn.actor!==actor){liveTurn={turn:n,actor,steps:[]};liveShown=Infinity;}
+}
+function liveDelta(before,after){
+  if(!before||!after)return [];
+  const lines=[];
+  for(const k of KS){
+    const old=before.loc[k],now=after.loc[k],symbol=KVIS[k]?.emoji||k;
+    if(!old||!now)continue;
+    now.marriages.filter(name=>!old.marriages.includes(name)).forEach(name=>lines.push(`${symbol} Established: ${name}.`));
+    old.marriages.filter(name=>!now.marriages.includes(name)).forEach(name=>lines.push(`${symbol} Left hierarchy: ${name}.`));
+    if(old.royal!==now.royal)lines.push(`${symbol} Crown: ${old.royal||'vacant'} → ${now.royal||'vacant'}.`);
+    if(now.dead>old.dead)lines.push(`${symbol} Deaths: ${now.dead-old.dead} character(s).`);
+    if(now.divorced>old.divorced)lines.push(`${symbol} Permanently divorced: ${now.divorced-old.divorced} character(s).`);
+    if(old.coffer!==now.coffer)lines.push(`${symbol} Coffer: ${old.coffer} → ${now.coffer}.`);
+  }
+  after.proposals.filter(x=>!before.proposals.includes(x)).forEach(x=>lines.push(`💍 Engagement created: ${x}.`));
+  before.proposals.filter(x=>!after.proposals.includes(x)).forEach(x=>lines.push(`💍 Engagement resolved: ${x}.`));
+  after.bachelors.filter(x=>!before.bachelors.includes(x)).forEach(x=>lines.push(`🧑 Entered Bachelor Area: ${x}.`));
+  before.bachelors.filter(x=>!after.bachelors.includes(x)).forEach(x=>lines.push(`↪️ Left Bachelor Area: ${x}.`));
+  if(after.battles>before.battles)lines.push(`⚔️ Battles: ${after.battles-before.battles}.`);
+  return lines;
+}
+function recordLiveStep(title,results=[]){
+  if(!liveTurn)return;
+  const lines=[...new Set(results.filter(Boolean).map(x=>String(x)))];
+  liveTurn.steps.push({title:String(title),lines});
+  // Keep per-turn history finite even in lengthy wars.
+  if(liveTurn.steps.length>120)liveTurn.steps.splice(0,liveTurn.steps.length-120);
+}
+function observeLiveStep(game,title,operation,{logEmpty=true,extra=[]}={}){
+  if(!game||liveCaptureDepth)return operation();
+  beginLiveTurn(game);
+  const before=snapState(game),eventIndex=(game.turnEvents||[]).length;
+  liveCaptureDepth++;
+  let outcome;
+  try{outcome=operation();}
+  finally{
+    liveCaptureDepth--;
+    const after=snapState(game),events=(game.turnEvents||[]).slice(eventIndex);
+    const changes=liveDelta(before,after);
+    if(logEmpty||events.length||changes.length)recordLiveStep(title,[...events,...changes,...extra]);
+  }
+  return outcome;
+}
+function liveTurnHTML(){
+  if(!liveTurn)return '<b>📝 Current Turn</b><p class="muted">Waiting for the game to begin.</p>';
+  const steps=liveTurn.steps.slice(0,liveShown);
+  return `<div class="live-ledger-head"><b>📝 Current Turn · ${escapeHTML(String(liveTurn.turn))} — ${escapeHTML(liveTurn.actor)}</b><span class="muted tiny">Actions and results in chronological order</span></div>`+
+   (steps.length?steps.map((step,i)=>`<div class="live-step"><div class="live-step-title"><span class="live-step-number">${i+1}.</span>${escapeHTML(step.title)}</div>${step.lines.length?`<ul class="live-step-results">${step.lines.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`:'<div class="muted tiny">No visible board change yet.</div>'}</div>`).join(''):
+   '<p class="muted">Turn started. Your next action will appear here.</p>');
+}
+// Observe real human engine calls. These wrappers run before the interface's
+// existing click handlers finish, so actions appear immediately when rendered.
+const originalHumanPlacement=humanPlacement; humanPlacement=function(game,move){return observeLiveStep(game,`🏰 Place engagement: ${describeMove(move)}`,()=>originalHumanPlacement(game,move));};
+const originalHumanMandatory=humanMandatory; humanMandatory=function(game,move){return observeLiveStep(game,`🃏 ${describeMove(move)}`,()=>originalHumanMandatory(game,move));};
+const originalHumanVP=humanVP; humanVP=function(game,move){return observeLiveStep(game,'⭐ Secret VP decision (private)',()=>originalHumanVP(game,move),{extra:[move.t==='vp'?`Private marker ${move.v} assigned to ${move.c.name}.`:'Secret VP marker was not assigned.']});};
+const originalHumanPiety=humanPiety; humanPiety=function(game,attach){return observeLiveStep(game,attach?'✝️ Attach Piety to engagement':'✝️ Continue without Piety',()=>originalHumanPiety(game,attach),{extra:[attach?'Piety card used; engagement receives Piety protection.':'No Piety card used.']});};
+const originalHumanOptional=humanOptional; humanOptional=function(game,move){return observeLiveStep(game,move?`😍 ${describeMove(move)}`:'⏭️ Skip optional bachelor action',()=>originalHumanOptional(game,move),{extra:move?[]:['Optional bachelor action passed.']});};
+const originalHumanWar=humanWar; humanWar=function(game,move){return observeLiveStep(game,`⚔️ ${describeMove(move)}`,()=>originalHumanWar(game,move));};
+const originalHumanDraw=humanDraw; humanDraw=function(game,move){return observeLiveStep(game,`🃏 Draw from Kingdom ${move.k}`,()=>originalHumanDraw(game,move));};
+// Bot turns: instrument every stage, including individual battles, rather
+// than only storing the final net state difference at the end of the turn.
+const originalBotTurn=botTurn; botTurn=function(game){beginLiveTurn(game);return originalBotTurn(game);};
+function observeBotStage(name,fn){return function(...args){
+  const game=args[0];
+  if(!game?.players?.[game.active]?.bot)return fn(...args);
+  const title=typeof name==='function'?name(...args):name;
+  return observeLiveStep(game,title,()=>fn(...args),{logEmpty:false});
+};}
+const originalMature=mature; mature=observeBotStage('💍 Mature public engagements',originalMature);
+const originalMandatory=mandatory; mandatory=observeBotStage((game,p,move)=>`🃏 ${describeMove(move)}`,originalMandatory);
+const originalOptional=optional; optional=observeBotStage((game,p,move)=>`😍 Optional action: ${describeMove(move)}`,originalOptional);
+const originalResolveBattle=resolveBattle; resolveBattle=observeBotStage((game,A,B,ac,bc)=>`⚔️ ${names(ac)} (${A.id}) attack ${names(bc)} (${B.id})`,originalResolveBattle);
+const originalRomance=resolveRomanceAfterWars; resolveRomanceAfterWars=observeBotStage('💔 Evaluate marriages after battles',originalRomance);
+const originalPayDepartmentIncome=payDepartmentIncome; payDepartmentIncome=observeBotStage('🏦 Bank and Mercantile payouts',originalPayDepartmentIncome);
+const originalRedraw=redraw; redraw=observeBotStage('🃏 Replenish computer hand',originalRedraw);
+
+function newGame(){
+ KS=ALL_KINGDOMS.slice(0,setupKingdomCount);
+ turnLedger=[];liveTurn=null;liveShown=Infinity;expandedKingdoms=new Set();g=configurePlayers(createGame(Math.floor(Math.random()*1e9)),setupHumanNames);runBotsUntilHuman(g);let q=startHumanTurn(g);phase=q.phase;moves=q.moves||[];turnStartSnap=snapState(g);beginLiveTurn(g);render()}
+const COLUMN_LABELS=["🗡️ Military · 🛡️ Defense","⛪ Church · 🏛 Government","🏦 Bank · 🌍 Mercantile"];
+const KVIS={A:{emoji:"🦁",cls:"kingdomA"},B:{emoji:"🦅",cls:"kingdomB"},C:{emoji:"🦋",cls:"kingdomC"},D:{emoji:"🐉",cls:"kingdomD"}};
+const PLAYER_SYMBOL=["🌬️","🔥","🍀","💧"]; const playerSymbol=id=>id===null||id===undefined?"":(PLAYER_SYMBOL[id]||"");
+function boldMax(vals,i){const mx=Math.max(...vals);return vals[i]===mx?'font-weight:800':''}
+
+let inspectedId=null;
+function pid(x){return String(x.id??x.uid??`${x.name}|${x.sex}|${x.heritage}|${x.A}|${x.S}|${x.W}|${x.T}`)}
+function allLivingPeople(g){
+ const out=[],seen=new Set(),add=x=>{let z=pid(x);if(x&&!seen.has(z)){seen.add(z);out.push(x)}};
+ for(const K of Object.values(g.kingdoms))for(const c of established(K))c.people.forEach(add);
+ g.bachelors.forEach(add);g.proposals.forEach(c=>c.people.forEach(add));
+ const v=window.skOnlineActive ? g.players[window.skSeatIndex] : (g.players.find(p=>!p.bot)||g.players[0]); if(v) v.hand.forEach(add);
+ return out;
+}
+function locationLabel(x){
+ for(const [k,K] of Object.entries(g.kingdoms)){
+  if(K.royals&&K.royals.people.includes(x))return `${x.sex==="M"?"👑 King":"👑 Queen"} · Kingdom ${k} ${KVIS[k].emoji}`;
+  for(let col=0;col<3;col++){let i=K.branches[col].findIndex(c=>c.people.includes(x));if(i>=0)return `${i===0?(x.sex==="M"?"🤴 Prince":"👸 Princess"):(x.sex==="M"?"🧝‍♂️ Duke":"🧝‍♀️ Duchess")} · Kingdom ${k} ${KVIS[k].emoji} · C${col+1} depth ${i+1}`;}
+ }
+ let q=g.proposals.find(c=>c.people.includes(x));if(q)return `💍 Proposed engagement${q.pietyOwner!==null?` · ✝${playerSymbol(q.pietyOwner)}`:""}`;
+ if(g.bachelors.includes(x))return `${x.sex==="M"?"👨‍🌾 Bachelor":"👩‍🌾 Bachelorette"} Area`;
+ const viewer=g.players.find(p=>!p.bot)||g.players[0];if(viewer&&viewer.hand.includes(x))return `🃏 Your hand`;
+ return x.status==="divorced"?"💔 Divorced":x.status==="dead"?"☠️ Dead":"Unknown";
+}
+function relationshipOf(x){
+ for(const K of Object.values(g.kingdoms))for(const c of established(K))if(c.people.includes(x))return c;
+ return g.proposals.find(c=>c.people.includes(x))||null;
+}
+function inspectHTML(x){
+ if(!x)return "";
+ const rel=relationshipOf(x),partner=rel?rel.people.find(y=>y!==x):null;
+ let a=allLivingPeople(g).filter(y=>y.sex!==x.sex).sort((u,v)=>attraction(x,v)-attraction(x,u));
+ return `<div class=inspect><b>${x.name}: attraction to every visible opposite-sex character</b>
+ <div class=muted>Public characters + your own hand only · ❤️ ${x.name}→them · 💘 them→${x.name} · 💗 their base Attractiveness</div>
+ ${a.map(y=>{const paired=y===partner;const piety=paired&&rel&&rel.pietyOwner!==null;const base=attraction(x,y);const protectingKingdom=Object.values(g.kingdoms).find(K=>established(K).includes(rel));const churchBoost=piety&&protectingKingdom?0.2*churchWisdom(protectingKingdom,rel.pietyOwner):0;const threshold=base+(piety?x.W+churchBoost:0);return `<div class="inspectrow${paired?' partner':''}"><b>${paired?'💍 CURRENT PARTNER · ':''}${y.name}</b>${y.playedBy!==null?` ${playerSymbol(y.playedBy)}`:""} · <span class=muted>${locationLabel(y)}</span><br>👪${KVIS[y.heritage]?.emoji||"?"} 🏰${KVIS[y.allegiance]?.emoji||"?"} · ❤️ <b>${base.toFixed(1)}</b> · 💘 ${attraction(y,x).toFixed(1)} · 💗 ${y.A}${piety?`<br><span class=pietyNote>✝ Piety: +${x.W} personal Wisdom +${churchBoost.toFixed(1)} Church → ${x.name}'s leave threshold ${threshold.toFixed(1)}</span>`:''}</div>`}).join("")}</div>`;
+}
+function warHTML(k){
+ const K=g.kingdoms[k];
+ return `<div class=wargrid>${KS.filter(t=>t!==k).map(t=>{let w=warScore(g,k,t);return `${KVIS[t].emoji} ${t}: Hatred <b>${Math.round(K.hatred[t])}</b> · War desire <b>${w===null?"—":Math.round(w)}</b> ${w===null?"":warWarning(w)}<br>`}).join("")}</div>`;
+}
+// Show exact engine math rather than rounded or undocumented approximations.
+function warEquationHTML(a,b){
+ const A=g.kingdoms[a],ta=totals(A),tb=totals(g.kingdoms[b]);
+ if(!ta.count||!tb.count)return `<div class="war-equation">${a} → ${b}: no established couples</div>`;
+  const parts=warParts(g,a,b),score=parts.score,fmt=n=>Number(n).toFixed(1);
+ return `<div class="war-equation"><b>${KVIS[a].emoji} ${a} → ${KVIS[b].emoji} ${b}: ${fmt(score)} ${warWarning(score)}</b><br>
+    <code>Baseline: ${fmt(ta.meanS)} + ${fmt(tb.meanT)} − ${fmt(tb.meanS)} − ${fmt(ta.meanT)} − ${fmt(royalW(A))} + (${fmt(A.hatred[b])}) = ${fmt(parts.base)}</code><br>
+    🏛 Government: −${fmt(parts.govPeace)} wisdom +${fmt(parts.govAggression)} treasure −${fmt(parts.foreignDeterrence)} heritage/piety deterrence → <b>${fmt(score)}</b></div>`;
+}
+function departmentSummaryHTML(k){
+  const K=g.kingdoms[k],mil=militaryBonuses(K),gov=governmentStats(K),income=incomeProjection(g),fmt=n=>Number(n).toFixed(1);
+  const clergy=K.branches[1].filter(c=>c.pietyOwner!==null);
+  const church=clergy.map(c=>`${playerSymbol(c.pietyOwner)} ${names(c)}: +${fmt(0.2*coupleWisdom(c))} loyalty to same-Piety marriages`).join('<br>')||'No active Piety clergy';
+  const trade=income.links.filter(l=>l.to===k).map(l=>`${KVIS[l.from].emoji} ${l.from} → +${l.amount.toFixed(2)}`).join(' · ')||'No incoming heritage trade';
+  return `<div class="department-details">
+    <div>🗡️ <b>Military (Column 1)</b>: +${fmt(mil.offense)} offense = 0.2 × wisdom · 🛡️ +${fmt(mil.defense)} defense = 0.1 × (strength + wisdom). Applied to every fighting marriage. 🏳️ Retreat applies on defeat margin ≤ losing couple's wisdom.</div>
+    <div>⛪ <b>Church (Column 2)</b>: ${church}. Piety-marked couples of the same player in this kingdom gain this protection against leaving a marriage.</div>
+    <div>🏛 <b>Government (Column 2)</b>: outgoing war desire −${fmt(gov.peace)} (0.2 × wisdom) +${fmt(gov.aggression)} (0.2 × treasure). Members with a rival kingdom's heritage deter that kingdom by 0.2 × wisdom; 0.4 × wisdom when Piety-marked.</div>
+    <div>🏦 <b>Bank (Column 3)</b>: +${income.direct[k].toFixed(2)} coffers/turn (0.10 × sum of Column 3 marriages' (treasure + wisdom) ÷ ${g.players.length} players).</div>
+    <div>🌍 <b>Mercantile (Column 3)</b>: +${income.outside[k].toFixed(2)} coffers/turn from foreign banks. ${trade}. A foreign treasury containing your heritage receives your bank's income, without deducting it from you.</div>
+    <div class="muted">Coffers store fractional values; displayed balances are whole numbers. Income is credited after each completed player turn.</div>
+  </div>`;
+}
+function warMathHTML(k){
+  return `<details class="war-math-details"><summary>🧮 War math & department effects</summary>
+  <div class="muted">Original baseline remains: attacker mean strength + defender mean treasure − defender mean strength − attacker mean treasure − attacker royal wisdom + hatred. Government modifies war desire, but warning thresholds are unchanged. Combat separately uses Military and retreat. Wars resolve before automatic relationship checks and divorces.</div>
+  ${departmentSummaryHTML(k)}
+  ${KS.filter(other=>other!==k).map(other=>warEquationHTML(k,other)+warEquationHTML(other,k)).join('')}</details>`;
+}
+function allKingdomsHTML(){
+ return `<div class="all-kingdoms">${KS.map(k=>{
+   const K=g.kingdoms[k],level=kingdomWarLevel(g,k);
+   const royalCards=K.royals?K.royals.people.map(x=>cardHTML(x,x.sex==='M'?'👑 King':'👑 Queen')).join(''):'<span class="muted">Vacant crown</span>';
+   const branches=K.branches.map((br,i)=>br.length?`<div class="glance-branch"><h4>${COLUMN_LABELS[i]}</h4>${br.map(c=>`<div class="glance-people">${c.people.map(x=>cardHTML(x)).join('')}</div>`).join('')}</div>`:'').join('');
+   const dw=!botBusy&&phase==='draw'?moves.findIndex(m=>m.k===k):-1;
+   return `<article class="kingdom-glance ${warStatusClass(level)}"><div class="glance-title"><b>${KVIS[k].emoji} Kingdom ${k} ${warStatusLabel(level)}</b><button data-focus-kingdom="${k}">Expand</button></div><div class="muted">💰 ${Math.round(K.coffers)} in coffer · ${established(K).length} established marriages · ${K.remaining} cards left</div>
+      ${warHTML(k)}${warMathHTML(k)}<div class="glance-people">${royalCards}</div>${zoneHTML(k)}${branches}${dw>=0?`<button class="primary" data-draw="${dw}">Draw from ${k}</button>`:''}</article>`;
+ }).join('')}</div>`;
+}
+function ministryBadge(x){
+  for(const K of Object.values(g.kingdoms))for(const c of K.branches[1])if(c.pietyOwner!==null&&c.people.includes(x)){
+    return `<div class="priest-tag">⛪ ${x.sex==='M'?'Priest':'Priestess'} ${playerSymbol(c.pietyOwner)} · same-Piety loyalty</div>`;
+  }
+  return '';
+}
+function personCard(x,title=""){
+ const attrs=[x.A,x.S,x.W,x.T], ds=[x.dA,x.dS,x.dW,x.dT], h=KVIS[x.heritage]?.emoji||"?", al=KVIS[x.allegiance]?.emoji||"?";
+ const portrait=culturePortraitHTML(x),cultureTag=personCultureTagHTML(x);
+ return `<div class="card charcard ${inspectedId===pid(x)?'selected':''}" data-person="${pid(x)}">${title?`<b>${title}</b><br>`:''}<b>${x.name}</b>${x.playedBy!==null?` ${playerSymbol(x.playedBy)}`:""} (${x.sex})${cultureTag}${ministryBadge(x)}${portrait}
+ <div class=identity>👪${h} · 🏰${al}${x.secretOwner===0?` · ⭐ Secret ${x.secretVP} VP`:""}</div>
+ <div class=statline><span style="${boldMax(attrs,0)}">💗 ${x.A}</span> · <span style="${boldMax(attrs,1)}">💪 ${x.S}</span> · <span style="${boldMax(attrs,2)}">🧠 ${x.W}</span> · <span style="${boldMax(attrs,3)}">💰 ${x.T}</span></div>
+ <div class=desireline><span class=muted>Desires:</span> <span style="${boldMax(ds,0)}">💗 ${(x.dA/1000).toFixed(3)}</span> · <span style="${boldMax(ds,1)}">💪 ${(x.dS/1000).toFixed(3)}</span> · <span style="${boldMax(ds,2)}">🧠 ${(x.dW/1000).toFixed(3)}</span> · <span style="${boldMax(ds,3)}">💰 ${(x.dT/1000).toFixed(3)}</span></div></div>`;
+}
+function kingdomDetailHTML(k,K){
+ if(!expandedKingdoms.has(k))return '';
+ const crown=K.royals?`<div class=branch><b>👑 Crown</b><div class=hand>${K.royals.people.map(x=>personCard(x,x.sex==='M'?'👑 King':'👑 Queen')).join('')}</div></div>`:`<div class=branch><b>👑 Crown vacant</b></div>`;
+ const branches=K.branches.map((br,i)=>`<div class=branch><b>Column ${i+1}</b>${br.length?br.map((c,d)=>`<div class=tiny style="margin-top:7px"><b>${d===0?'🤴👸 Prince / Princess':'🧝‍♂️🧝‍♀️ Duke / Duchess'} · depth ${d+1}</b></div><div class=hand>${c.people.map(x=>personCard(x,d===0?(x.sex==='M'?'🤴 Prince':'👸 Princess'):(x.sex==='M'?'🧝‍♂️ Duke':'🧝‍♀️ Duchess'))).join('')}</div>`).join(''):'<div class=muted style="margin-top:6px">Empty branch</div>'}</div>`).join('');
+ return `<div class=kingdomDetail>${crown}${branches}</div>`;
+}
+let scoreOpen=false,personalScoreOpen=false,overallScoreOpen=false;
+function worldScoreHTML(){const s=scoreGame(g),p=s.players.find(x=>x.playerId===viewer().id)||s.players[0];
+ const unlocked=!!viewer().secretRevealed;
+ // Mask the secret Kingdom's value, not the real game-engine score.
+ const displayPersonal=p.secretCharacterVP+(unlocked?p.secretKingdomTreasure:0);
+ const displayOverall=s.worldScore+displayPersonal;
+ return `<div class=scoreHead id=overallHead>🏆 Overall Score: ${Math.round(displayOverall)} ${overallScoreOpen?'▾':'▸'} <span class=muted>tap for breakdown</span></div>${overallScoreOpen?`<div class=scoreBreak>🌍 World Score: <b>${Math.round(s.worldScore)}</b><br>⭐ Personal Score: <b>${Math.round(displayPersonal)}</b><br><b>Overall Score: ${Math.round(displayOverall)}</b></div>`:''}<div class=scoreHead id=scoreHead style="margin-top:8px">🌍 World Score: ${Math.round(s.worldScore)} ${scoreOpen?'▾':'▸'} <span class=muted>tap for breakdown</span></div>${scoreOpen?`<div class=scoreBreak>Peace before first player war: <b>${3*s.turnsBeforeFirstWar}</b> (${s.turnsBeforeFirstWar} × 3)<br>Peaceful scored turns: <b>${4*g.peaceTurns}</b> (${g.peaceTurns} × 4)<br>Turns before first divorce: <b>${2*s.turnsBeforeFirstDivorce}</b> (${s.turnsBeforeFirstDivorce} × 2)<br>No-divorce turns: <b>${3*g.noDivorceTurns}</b> (${g.noDivorceTurns} × 3)<br>Dead/divorced people: <b>−${s.deadDivorced}</b><br>Base World Score: <b>${Math.round(s.baseWorldScore)}</b><br>⚖️ Equity: <b>${Math.round(s.equityScore)}</b> (${Math.round(s.poorestCoffer)} poorest − ${Math.round(s.richestCoffer)} richest)<br><b>Total World Score: ${Math.round(s.worldScore)}</b></div>`:''}<div class=scoreHead id=personalHead style="margin-top:8px">⭐ Personal Score: ${Math.round(displayPersonal)} ${personalScoreOpen?'▾':'▸'} <span class=muted>tap for breakdown</span></div>${personalScoreOpen?personalScoreBreakdownHTML(p,unlocked):''}`;}
+function personalScoreBreakdownHTML(p,unlocked=!!viewer().secretRevealed){const rows=p.secretCharacterBreakdown.map(b=>{let x=findPersonById(b.id);let love=b.happinessVP;return `<div class=vpItem><b>⭐ ${b.marker} · ${x?x.name:'Unknown'}</b> — ${b.state}<br>${b.marker} × ${b.multiplier} position = <b>${Math.round(b.statusVP)}</b> · subordinates ${b.subordinateMarriages} × 100 = <b>${Math.round(b.hierarchyVP)}</b> · ❤️ love = <b>${love.toFixed(1)}</b> · total <b>${(b.totalVP).toFixed(1)}</b></div>`}).join('');return `<div class=scoreBreak>🔐 Secret Kingdom wealth: <b>${unlocked?Math.round(p.secretKingdomTreasure):'Hidden · counts as 0 until all Piety cards are played'}</b><br>⭐ Six Secret VP characters: <b>${Math.round(p.secretCharacterVP)}</b>${rows}<br><b>Personal Score: ${Math.round(p.secretCharacterVP+(unlocked?p.secretKingdomTreasure:0))}</b></div>`;}
+function findPersonById(id){for(const Q of Object.values(g.kingdoms)){let x=Q.dead.find(z=>z.id===id)||Q.divorced.find(z=>z.id===id);if(x)return x;for(const c of established(Q)){x=c.people.find(z=>z.id===id);if(x)return x;}}let x=g.bachelors.find(z=>z.id===id);if(x)return x;for(const q of g.proposals){x=q.people.find(z=>z.id===id);if(x)return x;}for(const p of g.players){x=p.hand.find(z=>z.id===id);if(x)return x;}return null;}
+function privateVPTracker(p){if(!p.assignments.length)return '';const ps=scoreGame(g).players.find(z=>z.playerId===p.id);return `<div class=vpTracker id=vpTrackerBox style="cursor:pointer"><b>⭐ Your Secret VP characters · ${Math.round(ps?.secretCharacterVP||0)} pts</b><div class=muted>tap for Personal Score breakdown</div>${p.assignments.map(([id,v])=>{let x=null;for(const Q of Object.values(g.kingdoms)){x=Q.dead.find(z=>z.id===id)||Q.divorced.find(z=>z.id===id);if(x)break;}if(!x)x=g.bachelors.find(z=>z.id===id);if(!x)for(const q of g.proposals){x=q.people.find(z=>z.id===id);if(x)break;}if(!x)for(const Q of Object.values(g.kingdoms)){for(const c of established(Q)){x=c.people.find(z=>z.id===id);if(x)break;}if(x)break;}const loc=x?locationLabel(x):'Unknown';const icon=loc.startsWith('☠️')?'☠️':loc.startsWith('💔')?'💔':/^(👑 King|👑 Queen)/.test(loc)?'👑':loc.startsWith('🤴 Prince')?'🤴':loc.startsWith('👸 Princess')?'👸':loc.startsWith('🧝‍♂️ Duke')?'🧝‍♂️':loc.startsWith('🧝‍♀️ Duchess')?'🧝‍♀️':loc.startsWith('👨‍🌾 Bachelor')?'👨‍🌾':loc.startsWith('👩‍🌾 Bachelorette')?'👩‍🌾':loc.startsWith('💍 Proposed')?'💍':'❔';return `<div class=vpItem>⭐ ${v} VP · ${x?x.name:'Unknown'} · ${icon} ${loc}</div>`}).join('')}</div>`;}
+function render(){
+ let p=g.players[g.active];
+ $('#status').innerHTML=`<b>Turn ${g.turn+1}</b> — ${p.name} &nbsp; <span class=muted>${g.ended?g.endReason:'Human turn'}</span>`; $('#worldScore').innerHTML=worldScoreHTML();
+ $('#kingdoms').innerHTML=Object.entries(g.kingdoms).map(([k,K])=>`<div class="k ${KVIS[k].cls}"><div class=kingdomHead data-kingdom="${k}"><b>Kingdom ${k} ${KVIS[k].emoji} ${expandedKingdoms.has(k)?'▾':'▸'}</b>${kingdomCultureTagHTML(k)}<br>💰 Coffer: ${Math.round(K.coffers)} &nbsp; Deck: ${K.remaining} &nbsp; Marriages: ${established(K).length}<div class=muted>Tap kingdom to ${expandedKingdoms.has(k)?'hide':'show'} full hierarchy</div></div>${warHTML(k)}${K.royals?`<div class=royals>${K.royals.people.map(x=>personCard(x,x.sex==='M'?'👑 King':'👑 Queen')).join('')}</div>`:'<br><b>No Royal Marriage</b>'}${kingdomDetailHTML(k,K)}</div>`).join('');
+ let singles=g.bachelors.map((x,i)=>personCard(x,`#${i+1} ${x.sex==="M"?"👨‍🌾 Bachelor":"👩‍🌾 Bachelorette"}`)).join('');
+ let props=g.proposals.map(q=>`<div class=card><b>💍 Proposed engagement${q.pietyOwner!==null?` · ✝ Piety ${playerSymbol(q.pietyOwner)}`:''}</b><div class=hand>${personCard(q.people[0])}${personCard(q.people[1])}</div></div>`).join('');
+ $('#bachelors').innerHTML=`<b>Singles</b><div class=hand style="margin-top:8px">${singles||'<span class=muted>No singles</span>'}</div>${g.proposals.length?`<br><b>Proposed engagements</b><div class=hand style="margin-top:8px">${props}</div>`:''}${inspectedId?inspectHTML(allLivingPeople(g).find(x=>pid(x)===inspectedId)):''}`;
+ $('#hand').previousElementSibling.textContent=`Your hand (${p.hand.length+p.piety.length} cards) · Secret VP remaining: ${p.vpSlots.join(", ")||"none"}${p.secretRevealed?` · 🔐 Secret Kingdom: ${p.secretKingdom} ${KVIS[p.secretKingdom].emoji}`:''}`; $('#hand').innerHTML=privateVPTracker(p)+p.hand.map(x=>personCard(x)).join('')+Array.from({length:p.piety.length},(_,i)=>`<div class=card><b>✝ Piety</b><br><span class=muted>Piety card ${i+1} of ${p.piety.length}</span></div>`).join('');
+ $('#prompt').textContent=(phase==='placement'?'Place matured engagement':phase==='mandatory'?'Mandatory play':phase==='vp'?'Secret VP assignment':phase==='piety'?'Attach Piety?':phase==='optional'?'Optional Bachelor action':phase==='war'?'Choose a battle':phase==='draw'?'Choose draw deck':'Turn complete')+` · Turn ${g.turn+1}`;
+ let html='';
+ if(phase==='piety'){
+   html=`<div style="margin-bottom:8px">Your played character successfully created an engagement. You may attach one Piety card now.</div>
+   <button class=primary data-piety=1>Attach Piety</button><button data-piety=0>Do not attach Piety</button>`;
+ } else {
+   if(phase==='optional')html='<button class=primary data-skip=1>Skip optional action</button>';
+   html+=moves.map((m,i)=>`<button data-i=${i}>${describeMove(m)}</button>`).join('');
+ }
+ $('#choices').innerHTML=html;
+ $('#ledger').style.display=ledgerOpen?'block':'none'; $('#ledger').innerHTML=ledgerHTML(); $('#ledgerToggle').textContent=ledgerOpen?'📝 Hide Turn Ledger':'📝 Show Turn Ledger';
+ let oh=document.getElementById('overallHead');if(oh)oh.onclick=()=>{overallScoreOpen=!overallScoreOpen;render()};let sh=document.getElementById('scoreHead');if(sh)sh.onclick=()=>{scoreOpen=!scoreOpen;render()};let ph=document.getElementById('personalHead');if(ph)ph.onclick=()=>{personalScoreOpen=!personalScoreOpen;render()};let vt=document.getElementById('vpTrackerBox');if(vt)vt.onclick=()=>{personalScoreOpen=!personalScoreOpen;render()};
+ document.querySelectorAll('[data-kingdom]').forEach(h=>h.onclick=e=>{e.stopPropagation();let k=h.dataset.kingdom;expandedKingdoms.has(k)?expandedKingdoms.delete(k):expandedKingdoms.add(k);render()});
+ document.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+ document.querySelectorAll('[data-piety]').forEach(b=>b.onclick=()=>pietyChoice(b.dataset.piety==='1'));
+ let sk=document.querySelector('[data-skip]');if(sk)sk.onclick=()=>finishOptionalChoice(null);
+ document.querySelectorAll('.charcard').forEach(c=>c.onclick=e=>{e.stopPropagation();inspectedId=inspectedId===c.dataset.person?null:c.dataset.person;render()});
+}
+function choose(i){
+ if(phase==='placement'){let q=humanPlacement(g,moves[i]);phase=q.phase;moves=q.moves||[];render()}
+ else if(phase==='mandatory'){let q=humanMandatory(g,moves[i]);phase=q.phase;moves=q.moves||[];render()}
+ else if(phase==='vp'){let q=humanVP(g,moves[i]);phase=q.phase;moves=q.moves||[];render()}
+ else if(phase==='war'){let q=humanWar(g,moves[i]);phase=q.phase;moves=q.moves||[];if(phase==='complete')handoff();else render()}
+ else if(phase==='draw'){let q=humanDraw(g,moves[i]);phase=q.phase;moves=q.moves||[];if(phase==='complete')handoff();else render()}
+ else finishOptionalChoice(moves[i]);
+}
+function pietyChoice(attach){let q=humanPiety(g,attach);phase=q.phase;moves=q.moves||[];render()}
+function handoff(){runBotsUntilHuman(g);if(!g.ended){let q=startHumanTurn(g);phase=q.phase;moves=q.moves||[];turnStartSnap=snapState(g)}else{phase='ended';moves=[]}render()}
+function finishOptionalChoice(m){let q=humanOptional(g,m);phase=q.phase;moves=q.moves||[];if(phase==='complete')handoff();else render()}
+function showFatal(err){
+  const box=document.createElement('div');
+  box.style.cssText='margin:16px 0;padding:14px;border:2px solid #9b1c1c;border-radius:10px;background:#fff0f0;color:#6d1111;white-space:pre-wrap';
+  box.innerHTML='<b>Game initialization error</b><br>'+String(err&&err.stack?err.stack:err);
+  document.querySelector('.wrap').prepend(box);
+}
+$('#ledgerToggle').onclick=()=>{ledgerOpen=!ledgerOpen;render()};
+$('#new').onclick=()=>{try{newGame()}catch(e){showFatal(e)}};
+
+</script><script type="text/x-sk-source">
+// Presentation state only. All actions come from the engine's current legal moves.
+let activeKingdom = 'A', selectedPerson = null, dragCards = false;
+let botBusy = false, botMessage = '', botLines = [], changedPeople = new Set(), gameEpoch = 0;
+const engineChoose = choose, enginePietyChoice = pietyChoice;
+const engineOptionalChoice = finishOptionalChoice, engineNewGame = newGame;
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const viewer = () => window.skOnlineActive ? g.players[window.skSeatIndex] : (g.players[g.active]?.bot ? (g.players.find(p => !p.bot) || g.players[0]) : g.players[g.active]);
+function moveSources(m) {
+  if (m.t === 'pair') return [m.a, m.b];
+  if (m.t === 'challenge') return [m.c || m.s];
+  if (m.t === 'war') return m.ac.people;
+  return m.c ? (m.c.people || [m.c]) : [];
+}
+function selectedMoves() {
+  return moves.map((move,index) => ({move,index})).filter(({move}) => !selectedPerson || moveSources(move).some(x => pid(x) === selectedPerson));
+}
+function targetMoves(id) {
+  if (!selectedPerson || botBusy) return [];
+  return selectedMoves().filter(({move:m}) => {
+    if (m.t === 'proposal') return pid(m.b) === id;
+    if (m.t === 'challenge') return pid(m.target) === id;
+    if (m.t === 'pair') return [m.a,m.b].some(x => pid(x) === id) && id !== selectedPerson;
+    if (m.t === 'war') return m.bc.people.some(x => pid(x) === id);
+    return false;
+  });
+}
+function cardHTML(x,title='') {
+  const id=pid(x), legal=targetMoves(id).length>0;
+  const source=!botBusy && moves.some(m => moveSources(m).some(p => pid(p)===id));
+  let html=personCard(x,title).replace(/ selected/g,'');
+  html=html.replace('class="card charcard ',`role="button" tabindex="0" aria-label="${escapeHTML(x.name)}${legal?', legal target':source?', select card':''}" aria-pressed="${selectedPerson===id}" draggable="${dragCards&&source}" class="card charcard ${selectedPerson===id?'selected ':''}${legal?'legal ':''}${changedPeople.has(id)?'changed ':''}`);
+  return html.slice(0,-6)+(legal?'<span class="legal-label">Legal target · tap to play</span>':'')+'</div>';
+}
+function actOnTarget(matches) {
+  if (matches.length===1) choose(matches[0].index);
+  else if (matches.length>1) {
+    $('#selectionHint').textContent='Several legal moves reach this target. Choose one below.';
+    renderChoices(matches);
+  }
+}
+function selectCard(id) {
+  if (botBusy || g.ended) return;
+  const targets=targetMoves(id);
+  if (targets.length) return actOnTarget(targets);
+  const isSource=moves.some(m=>moveSources(m).some(x=>pid(x)===id));
+  if(isSource){
+    const again=selectedPerson===id;
+    selectedPerson=again?null:id;
+    inspectedId=again?null:id;
+  } else {
+    const again=inspectedId===id;
+    inspectedId=again?null:id;
+    if(!again)selectedPerson=null;
+  }
+  render();
+}
+function preferenceHTML(x) {
+  const others=allLivingPeople(g).filter(y=>y!==x&&y.sex!==x.sex)
+    .map(y=>({y,to:attraction(x,y),back:attraction(y,x)}))
+    .sort((a,b)=>b.to-a.to||b.back-a.back||a.y.name.localeCompare(b.y.name));
+  const currentRelationship=relationshipOf(x),partner=currentRelationship?.people.find(y=>y!==x);
+  const fmt=n=>(n/1000).toFixed(3);
+  const rows=others.map(({y,to,back},i)=>{
+    const location=escapeHTML(locationLabel(y));
+    const legal=selectedPerson===pid(x)&&targetMoves(pid(y)).length>0;
+    const currentPartner=partner===y;
+    const piety=currentPartner&&currentRelationship?.pietyOwner!==null;
+    const protecting=Object.values(g.kingdoms).find(K=>established(K).includes(currentRelationship));
+    const church=piety&&protecting?0.2*churchWisdom(protecting,currentRelationship.pietyOwner):0;
+    const protection=piety?x.W+church:0;
+    const threshold=to+protection;
+    const protectionLabel=piety?`<div class="pref-protection">✝ Piety leave threshold: ❤️ ${to.toFixed(1)} + 🧠 ${x.W}${church?` + ⛪ ${church.toFixed(1)}`:''} = <b>${threshold.toFixed(1)}</b></div>`:'';
+    return `<div class="pref-rank${legal?' is-legal':''}${currentPartner?' current-partner':''}"${legal?` data-pref-target="${escapeHTML(pid(y))}" role="button" tabindex="0" aria-label="Play selected card targeting ${escapeHTML(y.name)}"`:''}><span class="number">${i+1}.</span><div class="pair-name">${escapeHTML(y.name)}${currentPartner?' 💍':''}${legal?' ✅':''}<div class="pref-location">${location}${legal?' · Tap to play':''}</div></div><div class="pref-score" title="Their preferences may be different"><b>❤️ ${to.toFixed(1)}</b><br><span class="muted">↩ ${back.toFixed(1)}</span>${protectionLabel}</div></div>`;
+  }).join('');
+  return `<div class="pref-top"><div><h3>❤️ ${escapeHTML(x.name)}’s ranked preferences</h3><span class="muted">${escapeHTML(locationLabel(x))} · ${others.length} known opposite-sex characters</span></div><button type="button" class="pref-close" id="closePrefs" aria-label="Close preferences">Close ✕</button></div>
+    <div class="pref-desires"><b>Desires:</b> 💗 ${fmt(x.dA)} · 💪 ${fmt(x.dS)} · 🧠 ${fmt(x.dW)} · 💰 ${fmt(x.dT)}<br><span class="muted">💗 Beauty · 💪 Strength · 🧠 Wisdom · 💰 Wealth</span></div>
+    <div class="pref-help">Sorted by ❤️ how strongly ${escapeHTML(x.name)} likes each person; ↩ shows their attraction back. ✅ marks an available legal target, 💍 their partner. For a Piety engagement, the leave threshold adds the character’s Wisdom (plus any applicable Church protection) to their attraction to their current partner. A high rank does not guarantee a legal move.</div>
+    ${rows||'<p>No known opposite-sex characters to rank yet.</p>'}`;
+}
+
+function renderChoices(list=selectedMoves()) {
+  const box=$('#choices');
+  if(botBusy){box.innerHTML='';return;}
+  if(g.ended){box.innerHTML='<span class="muted">Game complete. Start a new game to play again.</span>';return;}
+  if(phase==='piety') {
+    box.innerHTML='<button class="primary" data-piety="1">Attach Piety</button><button data-piety="0">Do not attach Piety</button>';
+    box.querySelectorAll('[data-piety]').forEach(b=>b.onclick=()=>pietyChoice(b.dataset.piety==='1'));
+    return;
+  }
+  box.innerHTML=(phase==='optional'?'<button class="primary" id="skipOptional">Skip optional action</button>':'')+
+    list.map(({move,index})=>`<button data-i="${index}">${escapeHTML(describeMove(move))}</button>`).join('');
+  box.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+  const skip=$('#skipOptional');if(skip)skip.onclick=()=>finishOptionalChoice(null);
+}
+function zoneHTML(k,col=null) {
+  const matches=!botBusy&&phase==='placement'?selectedMoves().filter(({move:m})=>m.k===k&&(col===null?m.royal:!m.royal&&m.col===col)):[];
+  return matches.map(({index})=>`<button class="primary placement-target" data-place="${index}">Place engagement ${col===null?'at the crown':`in column ${col+1}`}</button>`).join('');
+}
+let showTurnMoves=true,showYourHand=true;
+render = function() {
+  const p=viewer(),K=g.kingdoms[activeKingdom]||g.kingdoms.A;
+  $('#kingdomTabs').style.gridTemplateColumns=`repeat(${KS.length+1},minmax(0,1fr))`;
+  document.body.classList.toggle('busy',botBusy);
+  $('#new').disabled=false;
+  $('#status').innerHTML=`<b>Turn ${g.turn+1}</b> · ${escapeHTML(g.players[g.active].name)}<br><span class="muted">${escapeHTML(g.ended?g.endReason:botBusy?'Computer turn in progress':'Your turn · choose a legal move')}</span>`;
+  $('#worldScore').innerHTML=worldScoreHTML();
+  $('#kingdomTabs').innerHTML=KS.map(k=>{
+    const level=kingdomWarLevel(g,k), status=warStatusLabel(level);
+    return `<button id="tab-${k}" class="kingdom-tab ${warStatusClass(level)} ${!botBusy&&moves.some(m=>(m.t==='place'||m.t==='draw')&&m.k===k)?'legal':''}" role="tab" aria-selected="${activeKingdom===k}" aria-controls="kingdoms" tabindex="${activeKingdom===k?0:-1}" data-tab="${k}" aria-label="Kingdom ${k}${status?' · '+status:''}"><b>${KVIS[k].emoji} Kingdom ${k} ${status?`<span class="war-status-chip">${status}</span>`:''}</b><span>${CULTURE_PORTRAIT_CONFIG[k]?.tag||'Kingdom D'} · ${g.kingdoms[k].remaining} cards</span></button>`;
+  }).join('')+`<button id="tab-ALL" class="kingdom-tab all-tab" role="tab" aria-selected="${activeKingdom==='ALL'}" aria-controls="kingdoms" tabindex="${activeKingdom==='ALL'?0:-1}" data-tab="ALL" aria-label="View all kingdoms"><b>🏰 All</b><span>All kingdoms · compact</span></button>`;
+  $('#kingdoms').setAttribute('aria-labelledby',`tab-${activeKingdom}`);
+  if(activeKingdom==='ALL'){
+    $('#kingdoms').innerHTML=allKingdomsHTML();
+  }else{
+    const drawIndex=!botBusy&&phase==='draw'?moves.findIndex(m=>m.k===activeKingdom):-1;
+    $('#kingdoms').innerHTML=`<div class="kingdom-table ${KVIS[activeKingdom].cls} ${warStatusClass(kingdomWarLevel(g,activeKingdom))}"><div class="kingdom-meta"><h2>${KVIS[activeKingdom].emoji} Kingdom ${activeKingdom} <span class="war-board-chip">${warStatusLabel(kingdomWarLevel(g,activeKingdom))}</span></h2><span>💰 ${Math.round(K.coffers)} coffer · ${established(K).length} marriages</span>${drawIndex>=0?`<button class="primary" data-draw="${drawIndex}">Draw from this deck</button>`:''}</div>${warHTML(activeKingdom)}${warMathHTML(activeKingdom)}<div class="crown-row">${K.royals?K.royals.people.map(x=>cardHTML(x,x.sex==='M'?'👑 King':'👑 Queen')).join(''):'<span class="muted">Crown vacant</span>'}${zoneHTML(activeKingdom)}</div><div class="columns">${K.branches.map((br,col)=>`<div class="branch"><h3>${COLUMN_LABELS[col]}</h3>${zoneHTML(activeKingdom,col)}${br.map((c,d)=>`<div class="tiny">${d===0?'Prince / Princess':'Duke / Duchess'} · depth ${d+1}</div><div class="couple">${c.people.map(x=>cardHTML(x)).join('')}</div>`).join('')||'<span class="muted">Empty branch</span>'}</div>`).join('')}</div></div>`;
+  }
+  $('#bachelors').innerHTML=`<div class="public-cards">${g.bachelors.map(x=>cardHTML(x,x.sex==='M'?'Bachelor':'Bachelorette')).join('')||'<span class="muted">No singles on the table</span>'}</div>${g.proposals.length?`<h3>Proposed engagements</h3><div class="public-cards proposal-gallery">${g.proposals.map(q=>`<div class="proposal"><b>💍 Engagement${q.pietyOwner!==null?` · ✝ ${playerSymbol(q.pietyOwner)}`:''}</b><div class="couple">${q.people.map(x=>cardHTML(x)).join('')}</div></div>`).join('')}</div>`:''}`;
+  $('#handTitle').textContent=`Your hand · ${p.hand.length+p.piety.length} cards`;
+  $('#hand').innerHTML=p.hand.map(x=>cardHTML(x)).join('')+p.piety.map((_,i)=>`<div class="charcard piety-card"><b>✝ Piety</b><span class="muted">${i+1} of ${p.piety.length}</span></div>`).join('');
+  $('#privateTracker').innerHTML=`<div class="muted">Secret VP remaining: ${p.vpSlots.join(', ')||'none'}${p.secretRevealed?` · Secret Kingdom ${KVIS[p.secretKingdom]?.emoji||''} ${p.secretKingdom}`:''}</div>`+privateVPTracker(p);
+  const prompts={placement:'Place matured engagement',mandatory:'Play a character',vp:'Assign secret VP',piety:'Attach Piety?',optional:'Optional bachelor action',war:'Choose a battle',draw:'Draw a card',ended:'Game complete'};
+  $('#prompt').textContent=botBusy?'Computer players are taking their turns':`${prompts[phase]||'Turn complete'} · Turn ${g.turn+1}`;
+  $('#dockSummary').textContent=`Turn ${g.turn+1} · ${botBusy?'Computers':prompts[phase]||'Complete'}`;
+  $('#showMovesToggle').checked=showTurnMoves;
+  $('#showHandToggle').checked=showYourHand;
+  $('#turnContent').hidden=!showTurnMoves;
+  $('#handContent').hidden=!showYourHand;
+  const selected=allLivingPeople(g).find(x=>pid(x)===selectedPerson);
+  $('#selectionHint').textContent=botBusy?'Watch the table and public turn summary.':selected?`${selected.name} selected · tap a green target or choose a move.`:phase==='placement'?'Choose a highlighted kingdom and a column for the engagement.':phase==='draw'?'Choose a deck below or open a highlighted kingdom.':phase==='piety'?'Attach one Piety card to the engagement, or continue without one.':phase==='vp'?'Choose a secret VP marker below, or skip the assignment.':'Select a card to see its legal moves, or use the move buttons below.';
+  $('#clearSelection').hidden=!selectedPerson||botBusy;
+  const single=selectedPerson&&!botBusy?selectedMoves().find(({move})=>move.t==='single'):null;
+  $('#singleTarget').hidden=!single;if(single)$('#singleTarget').onclick=()=>choose(single.index);
+  const person=allLivingPeople(g).find(x=>pid(x)===(selectedPerson||inspectedId));
+  const prefs=$('#preferencePanel');
+  prefs.hidden=!person||botBusy;
+  prefs.innerHTML=person&&!botBusy?preferenceHTML(person):'';
+  if(!prefs.hidden){
+    $('#closePrefs').onclick=()=>{selectedPerson=null;inspectedId=null;render()};
+    prefs.querySelectorAll('[data-pref-target]').forEach(row=>{
+      const play=()=>actOnTarget(targetMoves(row.dataset.prefTarget));
+      row.onclick=play;
+      row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();play()}};
+    });
+  }
+  $('#inspection').hidden=true;$('#inspection').innerHTML='';
+  const livePane=$('#liveTurnLedger'),liveWasAtBottom=livePane.scrollHeight-livePane.clientHeight-livePane.scrollTop<50,liveOldScroll=livePane.scrollTop;
+   livePane.hidden=!liveTurnOpen;livePane.innerHTML=liveTurnHTML();if(liveWasAtBottom)livePane.scrollTop=livePane.scrollHeight;else livePane.scrollTop=liveOldScroll;$('#liveLedgerToggle').textContent=liveTurnOpen?'Hide current turn':'Show current turn';$('#liveLedgerToggle').setAttribute('aria-expanded',String(liveTurnOpen));
+   $('#ledger').hidden=!ledgerOpen;$('#ledger').style.display='';$('#ledger').innerHTML=ledgerHTML();$('#ledgerToggle').textContent=ledgerOpen?'Hide turn ledger':'Turn ledger';
+  $('#botActivity').hidden=!botMessage;
+  $('#botActivity').innerHTML=`<b class="${botBusy&&!botLines.length?'thinking':'bot-results'}">${escapeHTML(botMessage)}</b>${botLines.length?`<ul>${botLines.map(line=>`<li>${escapeHTML(line)}</li>`).join('')}</ul>`:''}`;
+  renderChoices();bindTable();
+  ['overallHead','scoreHead','personalHead','vpTrackerBox'].forEach(id=>{const el=document.getElementById(id);if(el){el.tabIndex=0;el.setAttribute('role','button');el.onclick=()=>{if(id==='overallHead')overallScoreOpen=!overallScoreOpen;else if(id==='scoreHead')scoreOpen=!scoreOpen;else personalScoreOpen=!personalScoreOpen;render()};el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}}}});
+  requestAnimationFrame(()=>document.documentElement.style.setProperty('--dock-height',`${$('.turn-dock').offsetHeight}px`));
+};
+function bindTable() {
+  document.querySelectorAll('[data-tab]').forEach(tab=>{
+    tab.onclick=()=>{activeKingdom=tab.dataset.tab;render()};
+    tab.onkeydown=e=>{let step=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(step||e.key==='Home'||e.key==='End'){e.preventDefault();activeKingdom=e.key==='Home'?KS[0]:e.key==='End'?'ALL':[...KS,'ALL'][([...KS,'ALL'].indexOf(activeKingdom)+step+KS.length+1)%(KS.length+1)];render();$(`#tab-${activeKingdom}`).focus()}};
+    // Switch tabs before starting a drag. Rebuilding the table mid-drag would
+    // remove the source node and cancel native dragging in some browsers.
+  });
+  document.querySelectorAll('[data-focus-kingdom]').forEach(b=>b.onclick=()=>{activeKingdom=b.dataset.focusKingdom;render()});
+  document.querySelectorAll('[data-place],[data-draw]').forEach(b=>{
+    b.onclick=()=>choose(Number(b.dataset.place??b.dataset.draw));
+    if(b.dataset.place!==undefined){b.ondragover=e=>{if(dragCards&&!botBusy){e.preventDefault();b.classList.add('drop-hover')}};b.ondragleave=()=>b.classList.remove('drop-hover');b.ondrop=e=>{e.preventDefault();if(dragCards&&selectedPerson&&!botBusy)choose(+b.dataset.place)}};
+  });
+  document.querySelectorAll('.charcard[data-person]').forEach(card=>{
+    card.onclick=e=>selectCard(card.dataset.person);
+    card.onkeydown=e=>{if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectCard(card.dataset.person)}};
+    card.ondragstart=e=>{
+      if(!dragCards||botBusy||card.getAttribute('draggable')!=='true'){e.preventDefault();return;}
+      selectedPerson=card.dataset.person;inspectedId=selectedPerson;e.dataTransfer.setData('text/plain',selectedPerson);e.dataTransfer.effectAllowed='move';
+      // Keep the dragged DOM node alive while updating targets and controls.
+      document.querySelectorAll('.charcard[data-person]').forEach(target=>{target.classList.toggle('selected',target.dataset.person===selectedPerson);target.classList.toggle('legal',targetMoves(target.dataset.person).length>0)});
+      renderChoices();$('#selectionHint').textContent='Drop onto a highlighted target, or tap a target. Choose a kingdom tab before dragging into it.';
+      const single=selectedMoves().find(({move})=>move.t==='single');$('#singleTarget').hidden=!single;if(single)$('#singleTarget').onclick=()=>choose(single.index);
+    };
+    card.ondragover=e=>{if(dragCards&&targetMoves(card.dataset.person).length){e.preventDefault();card.classList.add('drop-hover')}};
+    card.ondragleave=()=>card.classList.remove('drop-hover');
+    card.ondrop=e=>{e.preventDefault();card.classList.remove('drop-hover');if(dragCards&&!botBusy)actOnTarget(targetMoves(card.dataset.person))};
+  });
+  $('#singleTarget').ondragover=e=>{if(dragCards&&!$('#singleTarget').hidden)e.preventDefault()};
+  $('#singleTarget').ondrop=e=>{e.preventDefault();if(dragCards&&!botBusy&&!$('#singleTarget').hidden)$('#singleTarget').click()};
+}
+choose = function(i) {
+  if(botBusy||g.ended||!Number.isInteger(i)||!moves[i])return;
+  selectedPerson=null;inspectedId=null;changedPeople.clear();botMessage='';botLines=[];engineChoose(i);
+};
+pietyChoice = function(attach) {if(!botBusy&&!g.ended&&phase==='piety'){selectedPerson=null;enginePietyChoice(attach)}};
+finishOptionalChoice = function(m) {if(!botBusy&&!g.ended&&phase==='optional'){selectedPerson=null;engineOptionalChoice(m)}};
+const pause = ms => new Promise(resolve=>setTimeout(resolve,ms));
+function publicLocations() {
+  return new Map(allLivingPeople(g).filter(x=>!viewer().hand.includes(x)).map(x=>[pid(x),locationLabel(x)]));
+}
+handoff = async function() {
+  if(botBusy)return;
+  const epoch=gameEpoch,currentGame=g;botBusy=true;selectedPerson=null;inspectedId=null;
+  try {
+    while(!g.ended&&g.players[g.active].bot) {
+      const actor=g.players[g.active],before=publicLocations();
+      botMessage=`${playerSymbol(actor.id)} ${actor.name} is thinking`;botLines=[];changedPeople.clear();render();
+      await pause(650);if(epoch!==gameEpoch||g!==currentGame)return;
+      botTurn(g); // The original AI turn and its RNG calls stay intact.
+      const after=publicLocations();changedPeople=new Set([...after].filter(([id,loc])=>before.get(id)!==loc).map(([id])=>id));
+      const firstChanged=allLivingPeople(g).find(x=>changedPeople.has(pid(x))&&Object.values(g.kingdoms).some(K=>established(K).some(c=>c.people.includes(x))));
+      if(firstChanged&&activeKingdom!=='ALL')activeKingdom=firstChanged.allegiance;
+      botMessage=`${playerSymbol(actor.id)} ${actor.name} completed their turn`;
+      botLines=turnLedger.at(-1)?.lines||['No public board changes.'];
+       const count=liveTurn?.steps.length||0;
+       if(liveTurnOpen&&count){
+         for(let shown=1;shown<=count;shown++){
+           liveShown=shown;render();
+           await pause(280);if(epoch!==gameEpoch||g!==currentGame)return;
+         }
+       }
+       liveShown=Infinity;render();
+       await pause(600);if(epoch!==gameEpoch||g!==currentGame)return;
+    }
+    botBusy=false;changedPeople.clear();
+    if(!g.ended){const next=startHumanTurn(g);phase=next.phase;moves=next.moves||[];turnStartSnap=snapState(g);beginLiveTurn(g);botMessage='Your turn · computer turns complete';showPassToNextPlayer();}
+    else{phase='ended';moves=[];}
+    render();
+  } catch(err) {if(epoch===gameEpoch){botBusy=false;showFatal(err)}}
+};
+newGame = function() {
+  gameEpoch++;botBusy=false;selectedPerson=null;inspectedId=null;activeKingdom='ALL';botMessage='';botLines=[];changedPeople.clear();
+  engineNewGame();
+};
+function updateSetupControls(){
+  const count=Number($('#setupKingdomSelect').value);
+  const h=$('#setupHumanSelect');
+  const old=Math.min(Number(h.value)||1,count);
+  h.innerHTML=Array.from({length:count},(_,i)=>`<option value="${i+1}">${i+1} human${i?'s':''}</option>`).join('');
+  h.value=String(old);
+  const prev=[...$('#setupNames').querySelectorAll('input')].map(x=>x.value);
+  $('#setupNames').innerHTML=Array.from({length:old},(_,i)=>`<label class="setup-field">Human ${i+1} name<input maxlength="32" data-human="${i}" value="${escapeHTML(prev[i]||setupHumanNames[i]||`Player ${i+1}`)}" autocomplete="off"></label>`).join('');
+  $('#setupBots').textContent=`${count-old} random bot${count-old===1?'':'s'} will fill the remaining ${count-old===1?'seat':'seats'}. Turn order: humans first, then bots.`;
+  $('#cancelSetup').hidden=!g;
+}
+function showGameSetup(){
+  $('#setupKingdomSelect').value=String(setupKingdomCount);
+  $('#setupHumanSelect').innerHTML='';$('#setupNames').innerHTML='';
+  updateSetupControls();
+  $('#setupHumanSelect').value=String(Math.min(setupKingdomCount,setupHumanNames.length));
+  updateSetupControls();
+  $('#setupCover').hidden=false;
+  $('#setupKingdomSelect').focus();
+}
+function beginConfiguredGame(){
+  const count=Number($('#setupKingdomSelect').value),humans=Number($('#setupHumanSelect').value);
+  if(!Number.isInteger(count)||count<1||count>4||!Number.isInteger(humans)||humans<1||humans>count)throw Error('Invalid kingdom or human count');
+  const names=[...$('#setupNames').querySelectorAll('input')].map((x,i)=>x.value.trim().slice(0,32)||`Player ${i+1}`);
+  setupKingdomCount=count;setupHumanNames=names;
+  $('#setupCover').hidden=true;$('#passCover').hidden=true;
+  newGame();
+}
+$('#setupKingdomSelect').onchange=()=>updateSetupControls();
+$('#setupHumanSelect').onchange=()=>updateSetupControls();
+$('#startSetup').onclick=()=>{try{beginConfiguredGame()}catch(err){showFatal(err);$('#setupCover').hidden=false}};
+$('#cancelSetup').onclick=()=>{$('#setupCover').hidden=true};
+$('#new').onclick=()=>{if(g&&!window.confirm('Set up a new game? Your current Stable Kingdoms progress will be lost when you start it.'))return;showGameSetup()};
+function showPassToNextPlayer(){
+ if(g?.ended || setupHumanNames.length<2)return;
+ $('#passTitle').textContent=`${g.players[g.active].name}'s turn`;
+ $('#passCover').hidden=false;
+}
+$('#readyForTurn').onclick=()=>{$('#passCover').hidden=true;render()};
+$('#clearSelection').onclick=()=>{selectedPerson=null;inspectedId=null;render()};
+$('#liveLedgerToggle').onclick=()=>{liveTurnOpen=!liveTurnOpen;liveShown=Infinity;render()};
+ $('#dragEnabled').onchange=e=>{dragCards=e.target.checked;render()};
+$('#showMovesToggle').onchange=e=>{showTurnMoves=e.target.checked;render()};
+$('#showHandToggle').onchange=e=>{showYourHand=e.target.checked;render()};
+new ResizeObserver(()=>document.documentElement.style.setProperty('--dock-height',`${$('.turn-dock').offsetHeight}px`)).observe($('.turn-dock'));
+try{showGameSetup()}catch(err){showFatal(err)}
+
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="text/x-sk-source">
+(function(){
+ 'use strict';
+ window.skOnlineActive=false;window.skSeatIndex=-1;
+ const el=id=>document.getElementById(id);
+ const escapeText=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const PROJECT_URL='https://umrzadpfoylkgdcaauiu.supabase.co'; const KEY='sb_publishable_Mj32k6Cdm8vjvJ26JZalXA_u1uwy3XI';
+ let client=null,room=null,onlineScore=null,onlineHistory=[],loading=false,pollTimer=null,roomVersion=-1;
+ const store={getItem:k=>{try{return window['localStorage'].getItem(k)}catch{return null}},setItem:(k,v)=>{try{window['localStorage'].setItem(k,v)}catch{}},removeItem:k=>{try{window['localStorage'].removeItem(k)}catch{}}};
+ let configuredUrl=PROJECT_URL.startsWith('https://')?PROJECT_URL:store.getItem('sk_v13_public_url')||'';
+ let configuredKey=KEY.startsWith('sb_')||KEY.startsWith('eyJ')?KEY:store.getItem('sk_v13_public_key')||'';
+ function unpack(wrapper){
+  if(!wrapper||wrapper.format!=='stable-kingdoms-graph-v1')throw Error('Unrecognized state snapshot');
+  const nodes=wrapper.nodes,refs=nodes.map(n=>n.type==='Array'?[]:n.type==='Set'?new Set():n.type==='RNG'?Object.create(RNG.prototype):{});
+  const de=x=>x&&typeof x==='object'&&Object.prototype.hasOwnProperty.call(x,'$ref')?refs[x.$ref]:x;
+  nodes.forEach((n,i)=>{if(n.type==='Set')n.data.forEach(x=>refs[i].add(de(x)));else if(n.type==='Array')n.data.forEach(x=>refs[i].push(de(x)));else Object.entries(n.data).forEach(([k,v])=>refs[i][k]=de(v))});
+  return de(wrapper.reference);
+ }
+ function err(message){el('onlineError').textContent=message||'';}
+ function show(){el('setupCover').hidden=true;el('onlineCover').hidden=false;err('');el('onlineConfigPanel').hidden=!!(configuredUrl&&configuredKey);if(room)lobby(room);}
+ el('onlineEntry').onclick=show;
+ el('onlineClose').onclick=()=>{room=null;stopPolling();el('onlineCover').hidden=true;el('setupCover').hidden=false;};
+ el('onlineSaveConfig').onclick=()=>{const u=el('onlineUrl').value.trim().replace(/\/$/,'');const k=el('onlineKey').value.trim();if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(u)||!k){err('Please enter a valid Supabase project URL and its public publishable key.');return;}configuredUrl=u;configuredKey=k;store.setItem('sk_v13_public_url',u);store.setItem('sk_v13_public_key',k);el('onlineConfigPanel').hidden=true;err('Connection saved for this browser.');};
+ async function initAuth(){
+  if(client)return client;
+  if(!configuredUrl||!configuredKey){el('onlineConfigPanel').hidden=false;throw Error('Connect your Supabase project first.');}
+  if(!window.supabase?.createClient)throw Error('Could not load Supabase JS. Check your internet connection.');
+  client=window.supabase.createClient(configuredUrl,configuredKey,{auth:{storageKey:'sk_v13_auth_'+new URL(configuredUrl).host,autoRefreshToken:true,persistSession:true}});
+  const {data:{session}}=await client.auth.getSession();
+  if(!session){const {error}=await client.auth.signInAnonymously();if(error)throw Error(error.message+'. Enable Anonymous Sign-ins in Supabase Auth settings.');}
+  return client;
+ }
+ async function call(op,values={}){
+  const c=await initAuth();const {data:{session}}=await c.auth.getSession();if(!session)throw Error('Your session expired. Please reconnect.');
+  const r=await fetch(configuredUrl+'/functions/v1/stable-kingdoms',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':configuredKey},body:JSON.stringify({op,...values})});
+  let data;try{data=await r.json()}catch{throw Error('Unexpected server response '+r.status)}
+  if(!r.ok)throw Object.assign(new Error(data.error||'Server error '+r.status),{status:r.status});
+  return data;
+ }
+ let lbBoardCache=null,finalScoreCheckedRoom='',scoreEntrySaving=false;
+ const lbNames={overall:'🏆 Overall',world:'🌍 World',personal:'⭐ Personal'};
+ const lbFmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
+ function renderLeaderboards(board){
+   const list=el('skLbBoard');lbBoardCache=board||{};
+   list.innerHTML=['overall','world','personal'].map(cat=>{
+     const rows=board?.[cat]||[];
+     const contents=Array.from({length:10},(_,i)=>{
+       const item=rows[i];
+       return `<div class="sk-lb-entry ${!item?'sk-lb-placeholder':''}"><strong>${i+1}.</strong><span>${item?escapeText(item.name):'— available —'}</span><b>${item?lbFmt(item.score):'—'}</b></div>`;
+     }).join('');
+     return `<section class="sk-lb-column"><h3>${lbNames[cat]}</h3><div class="sk-lb-rows">${contents}</div></section>`;
+   }).join('');
+ }
+ async function openLeaderboards(){
+   el('skLeaderboards').hidden=false;el('skLbStatus').textContent='Loading worldwide scores…';
+   try{const data=await call('leaderboard');renderLeaderboards(data.board);el('skLbStatus').textContent='Showing verified final scores from completed online games.'}
+   catch(e){el('skLbStatus').textContent='Could not load scores: '+e.message;}
+ }
+ el('skLeaderboardButton').onclick=openLeaderboards;
+ el('skLobbyScores').onclick=openLeaderboards;
+ el('onlineLeaderboards').onclick=openLeaderboards;
+ el('skLbClose').onclick=()=>{el('skLeaderboards').hidden=true};
+ el('skLeaderboards').addEventListener('click',e=>{if(e.target===el('skLeaderboards'))el('skLeaderboards').hidden=true});
+ el('skScoreLater').onclick=()=>{el('skScoreEntry').hidden=true};
+ async function checkFinishedScore(){
+   if(!room?.roomId||finalScoreCheckedRoom===room.roomId)return;
+   finalScoreCheckedRoom=room.roomId;
+   try{
+     const data=await call('leaderboard',{roomId:room.roomId});const q=data.qualification;
+     if(!q||q.submitted||!q.categories?.length)return;
+     el('skScoreQualification').textContent=`You qualify for: ${q.categories.map(c=>lbNames[c]).join(', ')}. Your final scores — Overall ${lbFmt(q.scores.overall)}, World ${lbFmt(q.scores.world)}, Personal ${lbFmt(q.scores.personal)}.`;
+     el('skScoreName').value=(room.members||[]).find(p=>p.seat===room.seat)?.display_name||'';
+     el('skScoreError').textContent='';el('skScoreEntry').hidden=false;
+   }catch(e){finalScoreCheckedRoom='';console.warn('High score check failed',e.message);}
+ }
+ el('skScoreSave').onclick=async()=>{
+   if(scoreEntrySaving)return;
+   const name=el('skScoreName').value.trim();
+   if(!name){el('skScoreError').textContent='Please enter a name.';return;}
+   scoreEntrySaving=true;el('skScoreSave').disabled=true;el('skScoreError').textContent='Saving your verified final scores…';
+   try{
+     const result=await call('submit_score',{roomId:room.roomId,name});
+     if(result.submitted){el('skScoreEntry').hidden=true;renderLeaderboards(result.board);el('skLeaderboards').hidden=false;el('skLbStatus').textContent='Saved! Your entry appears in any category where it ranks in the top ten.';}
+     else{el('skScoreError').textContent=result.reason||'Your score did not qualify.';}
+   }catch(e){el('skScoreError').textContent='Could not save score: '+e.message;}
+   finally{scoreEntrySaving=false;el('skScoreSave').disabled=false;}
+ };
+ function lobby(data){
+  room=data;roomVersion=data.version;
+  el('onlineControls').hidden=true;el('onlineLobby').hidden=false;el('onlineRoomCode').textContent=data.code;
+  const n=data.humans,existing=data.members||[];
+  el('onlinePlayerList').innerHTML=`<b>${existing.length} of ${n} humans joined</b><br>`+existing.map(m=>`Seat ${m.seat+1}: ${escapeText(m.display_name)}`).join('<br>')+`<br>${data.kingdoms-n} random bots will fill the other seats.`;
+  el('onlineStart').hidden=data.seat!==0;
+  el('onlineStart').disabled=existing.length!==n;
+ }
+ function apply(data){
+  if(data.unchanged)return;
+  room=data;roomVersion=data.version;
+  window.skSeatIndex=data.seat;
+  if(data.status==='lobby'){lobby(data);return;}
+  if(!data.snapshot)return;
+  const x=unpack(data.snapshot);
+  window.skOnlineActive=true;
+  KS=ALL_KINGDOMS.slice(0,data.kingdoms);
+  g=x.g;phase=data.phase;moves=x.moves||[];onlineScore=data.score;
+  onlineHistory=data.history||[];
+  const steps=onlineHistory.filter(x=>x.turn===data.turn&&x.seat===data.seat).map(x=>({title:x.description,lines:x.eventLines||[]}));
+  liveTurn={turn:data.turn,actor:g.players[data.seat].name,steps};
+  botBusy=false;botMessage='';selectedPerson=null;inspectedId=null;
+  el('onlineCover').hidden=true;el('setupCover').hidden=true;el('passCover').hidden=true;
+  el('onlineBanner').hidden=false;
+  el('onlineBannerText').textContent=`🌎 Room ${data.code} · ${g.players[data.seat].name} · ${data.status==='finished'?'Game finished':data.phase==='waiting'?`Waiting for ${g.players[g.active].name}`:'Your turn'} · turn ${data.turn}`;
+  render();
+  if(data.status==='finished')void checkFinishedScore();
+ }
+ async function enter(op,values){if(loading)return;loading=true;err('');try{const data=await call(op,values);apply(data);startPolling();}catch(e){err(e.message)}finally{loading=false}}
+ el('onlineCreate').onclick=()=>enter('create',{kingdoms:Number(el('setupKingdomSelect').value),humans:Number(el('setupHumanSelect').value),name:el('onlineHostName').value});
+ el('onlineJoin').onclick=()=>enter('join',{code:el('onlineJoinCode').value,name:el('onlineJoinName').value});
+ el('onlineStart').onclick=()=>room&&enter('start',{roomId:room.roomId});
+ el('onlineCopyInvite').onclick=async()=>{const url=new URL(location.href);url.searchParams.set('join',room.code);try{await navigator.clipboard.writeText(url.toString());err('Invite link copied.')}catch{err('Share code '+room.code+' and the game URL.')}};
+ el('onlineLeave').onclick=()=>{if(!confirm('Leave the online view? Your room will remain saved.'))return;window.skOnlineActive=false;room=null;stopPolling();location.reload();};
+ function stopPolling(){if(pollTimer)clearInterval(pollTimer);pollTimer=null;}
+ function startPolling(){stopPolling();pollTimer=setInterval(async()=>{if(!room||loading)return;try{const data=await call('state',{roomId:room.roomId,since:roomVersion});apply(data)}catch(e){el('onlineBannerText').textContent='🌎 Reconnecting to room… '+e.message;}},3500);}
+ async function action(input){
+  if(loading||!room||!window.skOnlineActive||phase==='waiting')return;
+  loading=true;try{const data=await call('act',{roomId:room.roomId,version:roomVersion,action:input});apply(data)}catch(e){if(e.status===409){try{apply(await call('state',{roomId:room.roomId}));}catch{} }alert(e.message);}finally{loading=false;}
+ }
+ // Override the local actions only while inside a shared Supabase room.
+ const oldChoose=choose;choose=function(i){if(window.skOnlineActive)return action({type:'move',index:i});return oldChoose(i)};
+ const oldPiety=pietyChoice;pietyChoice=function(attach){if(window.skOnlineActive)return action({type:'piety',attach:!!attach});return oldPiety(attach)};
+ const oldOptional=finishOptionalChoice;finishOptionalChoice=function(move){if(window.skOnlineActive){if(move)return action({type:'move',index:moves.indexOf(move)});return action({type:'skip'});}return oldOptional(move)};
+ const originalScore=scoreGame;scoreGame=function(state){if(window.skOnlineActive)return onlineScore||{players:[],worldScore:0};return originalScore(state)};
+ const originalRender=render;render=function(){originalRender();
+  if(window.skOnlineActive){
+    const byTurn=new Map();for(const h of onlineHistory){if(!byTurn.has(h.turn))byTurn.set(h.turn,[]);byTurn.get(h.turn).push(h);}
+    el('ledger').innerHTML='<b>📝 Public Turn Ledger</b><div class="muted">Shared online history; newest turns first.</div>'+[...byTurn.entries()].reverse().map(([turn,events])=>`<div class="ledgerTurn"><b>Turn ${turn}</b>${events.map(e=>`<p><b>${escapeText(g.players[e.seat]?.name||'Player')}: ${escapeText(e.description)}</b></p>`+(e.eventLines||[]).map(line=>`<div>• ${escapeText(line)}</div>`).join('')).join('')}</div>`).join('');
+  }
+  if(window.skOnlineActive&&phase==='waiting'){
+  const opts=el('choices');if(opts)opts.innerHTML='<p class="muted">Waiting for the current player to finish. Your board will update automatically.</p>';
+  el('prompt').textContent='Waiting for '+g.players[g.active].name;
+  const single=el('singleTarget');if(single)single.hidden=true;
+  // The private hand remains accessible to its owner; all move controls are disabled.
+ }};
+ // Host may refresh or switch browsers. Anonymous Auth + room id on same browser persists.
+ const oldRoomId=store.getItem('sk_v13_last_room');
+ const oldSetRoom=apply;apply=function(data){oldSetRoom(data);if(room?.roomId)store.setItem('sk_v13_last_room',room.roomId)};
+ const queryJoin=new URL(location.href).searchParams.get('join');
+ if(queryJoin){show();el('onlineJoinCode').value=queryJoin.toUpperCase()}
+ else if(oldRoomId&&configuredUrl&&configuredKey){show();initAuth().then(()=>call('state',{roomId:oldRoomId})).then(data=>{apply(data);startPolling()}).catch(()=>{store.removeItem('sk_v13_last_room');room=null;el('onlineControls').hidden=false;el('onlineLobby').hidden=true;});}
+})();
+</script>
+<script>
+(async function(){
+ const pane=document.getElementById('skStartupNotice');
+ try{
+   const url=new URL('./index.html',location.href);
+   const r=await fetch(url.toString(),{cache:'force-cache'});
+   if(!r.ok)throw new Error('Could not load character portraits ('+r.status+')');
+   const base=await r.text();
+   const assets={};
+   for(const name of ['ROMAN_PORTRAIT_DATA','BYZANTINE_PORTRAIT_DATA','SLAVIC_PORTRAIT_DATA']){
+     const tag='const '+name+'=';
+     let start=base.indexOf(tag);
+     if(start<0)throw new Error('Missing '+name+' in original game.');
+     start+=tag.length;
+     const end=base.indexOf('};',start);
+     if(end<0)throw new Error('Incomplete portrait data: '+name);
+     const json=base.slice(start,end+1);
+     assets[name]=JSON.parse(json);
+     if(!Object.keys(assets[name]).length)throw new Error('No portraits for '+name);
+   }
+   window.__skPortraitAssets=assets;
+   for(const tag of document.querySelectorAll('script[type="text/x-sk-source"]')){
+     const active=document.createElement('script');active.textContent=tag.textContent;
+     document.body.appendChild(active);
+   }
+   pane?.remove();
+ }catch(e){
+   console.error('Could not load Stable Kingdoms',e);
+   if(pane){pane.innerHTML='<b>Could not load Stable Kingdoms.</b><p>'+String(e.message).replace(/[<>]/g,'')+'</p><p>Please use the GitHub Pages address, not a downloaded local file.</p>';}
+ }
+})();
+</script></body></html>
