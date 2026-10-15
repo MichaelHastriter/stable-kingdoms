@@ -18,6 +18,10 @@ body{font-family:system-ui;margin:0;background:#f3efe5;color:#241d16}.wrap{max-w
 
 /* Online multi-device lobby. Kept separate from the local pass-and-play setup. */
 #onlineEntry{width:100%;margin-top:10px}
+/* A separate practice activity: opens the existing minigame without touching multiplayer state. */
+.sk-practice-button{display:block;box-sizing:border-box;width:100%;margin-top:14px;padding:14px 18px;border:2px solid #a27c3d;border-radius:12px;background:#fff5d8;color:#243a32;font:700 15px/1.4 system-ui,-apple-system,sans-serif;text-align:center;text-decoration:none;cursor:pointer;min-height:52px;touch-action:manipulation}
+.sk-practice-button:hover{background:#ffe7aa;border-color:#875d22}
+.sk-practice-button:focus-visible{outline:3px solid #b87b16;outline-offset:3px}
 #onlineCover .cover-card{max-width:660px}
 #onlineCover label{display:grid;gap:5px;margin:10px 0;font-weight:650}
 #onlineCover input{font:inherit;padding:11px;border:1px solid #afbaa9;border-radius:9px;width:100%;min-width:0}
@@ -218,6 +222,7 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
 </select></label><p class="setup-notice">All available portraits are now included. Welsh queens and Continental Germanic kings temporarily use their uncrowned portraits, labeled as crown artwork pending. Character art does not change the game rules.</p><div id="setupNames"></div><p class="setup-notice" id="setupBots"></p>
   <p class="setup-tip"><b>Local playtest:</b> Human players take turns on this device. A privacy screen appears between human turns. Separate phones sharing one live game will require online multiplayer synchronization.</p>
   <div class="cover-actions"><button id="cancelSetup" type="button">Cancel</button><button class="primary" id="startSetup" type="button">Start game</button><button id="onlineEntry" type="button">🌎 Online: create or join a room</button></div>
+  <a id="practiceModeEntry" class="sk-practice-button" href="./stable-marriages-challenge.html" role="button" aria-label="Open Stable Marriages Challenge practice minigame">🧩 Practice Mode: Stable Marriages Challenge Minigame <span aria-hidden="true">↗</span></a>
  </div>
 </div>
 
