@@ -277,13 +277,14 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
   </div>
   <label class="setup-field" style="margin:12px 0">Kingdom cultures and portraits
 <select id="setupPortraitMode">
-<option value="random" selected>Randomize among all nine cultures</option>
+<option value="random" selected>Randomize among all ten cultures</option>
 <option value="anglo">Guarantee Anglo-Saxon among the kingdoms</option>
 <option value="irish">Guarantee Gaelic Irish among the kingdoms</option>
 <option value="welsh">Guarantee Welsh / Brittonic among the kingdoms</option>
 <option value="germanic">Guarantee Continental Saxon / Germanic among the kingdoms</option>
 <option value="lombard">Guarantee Lombard / Italian among the kingdoms</option>
 <option value="visigoth">Guarantee Visigoth / Iberian among the kingdoms</option>
+<option value="frankish">Guarantee Frankish among the kingdoms</option>
 <option value="classic">Classic: Roman A · Byzantine B · Slavic C · Gaelic D</option>
 <option value="custom">Customize each kingdom…</option>
 </select></label>
@@ -291,7 +292,7 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
   <p class="setup-notice"><b>Choose each kingdom's culture.</b> Random chooses an available culture; specific choices may repeat. These options currently work for <b>local games</b> only.</p>
   <div id="skCustomCultureRows" class="sk-custom-culture-rows"></div>
 </div>
-<p class="setup-notice">Welsh queens and Continental Germanic kings use uncrowned stand-ins until crown artwork arrives. Lombard / Italian and Visigoth / Iberian each have 160 portraits, crowned and uncrowned. Portraits do not change gameplay. Characters' art does not change their statistics or game rules.</p><div id="setupNames"></div><p class="setup-notice" id="setupBots"></p>
+<p class="setup-notice">Welsh queens and Continental Germanic kings use uncrowned stand-ins until crown artwork arrives. Lombard / Italian, Visigoth / Iberian, and Frankish each have 160 portraits, crowned and uncrowned. Portraits do not change gameplay. Characters' art does not change their statistics or game rules.</p><div id="setupNames"></div><p class="setup-notice" id="setupBots"></p>
   <p class="setup-tip"><b>Local playtest:</b> Human players take turns on this device. A privacy screen appears between human turns. Separate phones sharing one live game will require online multiplayer synchronization.</p>
   <div class="cover-actions"><button id="cancelSetup" type="button">Cancel</button><button class="primary" id="startSetup" type="button">Start game</button><button id="onlineEntry" type="button">🌎 Online: create or join a room</button></div>
   <a id="practiceModeEntry" class="sk-practice-button" href="./stable-marriages-challenge.html" role="button" aria-label="Open Stable Marriages Challenge practice minigame">🧩 Practice Mode: Stable Marriages Challenge Minigame <span aria-hidden="true">↗</span></a>
@@ -415,6 +416,7 @@ const WELSH_BRITTONIC_PORTRAIT_DATA=window.__skPortraitAssets.WELSH_BRITTONIC_PO
 const CONTINENTAL_GERMANIC_PORTRAIT_DATA=window.__skPortraitAssets.CONTINENTAL_GERMANIC_PORTRAIT_DATA||{};
 const LOMBARD_ITALIAN_PORTRAIT_DATA=window.__skPortraitAssets.LOMBARD_ITALIAN_PORTRAIT_DATA||{};
 const VISIGOTH_IBERIAN_PORTRAIT_DATA=window.__skPortraitAssets.VISIGOTH_IBERIAN_PORTRAIT_DATA||{};
+const FRANKISH_PORTRAIT_DATA=window.__skPortraitAssets.FRANKISH_PORTRAIT_DATA||{};
 const CULTURE_LIBRARY={
  roman:{slug:"roman",label:"Roman / Latin",tag:"🏛️ Roman/Latin",data:ROMAN_PORTRAIT_DATA,names:NAMES.A},
  byzantine:{slug:"byzantine",label:"Byzantine Greek",tag:"☦️ Byzantine Greek",data:BYZANTINE_PORTRAIT_DATA,names:NAMES.B},
@@ -436,6 +438,10 @@ const CULTURE_LIBRARY={
    M:["Alboin","Cleph","Authari","Agilulf","Arioald","Rothari","Grimoald","Liutprand","Ratchis","Desiderius","Adelchis","Gisulf"],
     F:["Rosamund","Theodelinda","Gundeperga","Rodelinda","Ansa","Ermelinda","Waldrada","Gisla","Gundrada","Gariperga","Adelperga","Bertrada"]
   }},
+  frankish:{slug:"frankish",label:"Frankish",tag:"⚜️ Frankish",data:FRANKISH_PORTRAIT_DATA,names:{
+    M:["Clovis","Childeric","Theuderic","Chlothar","Childebert","Sigebert","Chilperic","Dagobert","Charibert","Gundobad","Ragnachar","Gundovald","Merovech","Theudebert","Grimoald","Carloman","Pippin","Arnulf","Ebroin","Radoald"],
+    F:["Clotilde","Brunhild","Fredegund","Bertha","Galswintha","Ingund","Radegund","Audovera","Bathilde","Chlodosind","Theodechild","Berthetrude","Doda","Ermentrude","Bertrada","Anstrude","Gerberga","Adela","Aregund","Gundetrude"]
+  }},
   visigoth_iberian:{slug:"visigoth_iberian",label:"Visigoth / Iberian",tag:"🏰 Visigoth/Iberian",data:VISIGOTH_IBERIAN_PORTRAIT_DATA,names:{
     M:["Leovigild","Reccared","Sisebut","Suintila","Chindasuinth","Recceswinth","Wamba","Egica","Wittiza","Roderic","Theudis","Alaric","Amalaric","Euric","Athanagild","Liuva"],
     F:["Goiswintha","Brunhilda","Baddo","Liuvigoto","Cixilo","Clotilde","Recciberga","Theodora","Ingund","Ermengild","Amalberga","Austrechild","Egilona","Fruela","Olalla","Elvira"]
@@ -448,7 +454,7 @@ const skCultureSequence=(game,mode)=>{
  // This independent RNG does not alter the game's dice, deck, or matchup sequence.
  const salt=((Number(game?.seed)||11235813)^0x5EEDC0DE)>>>0;
  const rng=new RNG(salt);
- const list=["roman","byzantine","slavic","anglo_saxon","gaelic","welsh_brittonic","continental_germanic","lombard","visigoth_iberian"];
+ const list=["roman","byzantine","slavic","anglo_saxon","gaelic","welsh_brittonic","continental_germanic","lombard","visigoth_iberian","frankish"];
  rng.shuffle(list);
  if(mode==="classic")return kingdoms.map(k=>DEFAULT_CULTURES[k]||"gaelic");
  // Encoded choices can be reproduced from the game state; blank selections use unique random cultures if possible.
@@ -458,7 +464,7 @@ const skCultureSequence=(game,mode)=>{
    const available=list.filter(c=>!result.includes(c));
    return result.map(c=>c||available.shift()||list[0]);
  }
- const guaranteed={anglo:"anglo_saxon",irish:"gaelic",welsh:"welsh_brittonic",germanic:"continental_germanic",lombard:"lombard",visigoth:"visigoth_iberian"}[mode];
+ const guaranteed={anglo:"anglo_saxon",irish:"gaelic",welsh:"welsh_brittonic",germanic:"continental_germanic",lombard:"lombard",visigoth:"visigoth_iberian",frankish:"frankish"}[mode];
  if(guaranteed&&kingdoms.length&&!list.slice(0,kingdoms.length).includes(guaranteed)){
    const i=list.indexOf(guaranteed);
    [list[kingdoms.length-1],list[i]]=[list[i],list[kingdoms.length-1]];
@@ -2123,6 +2129,7 @@ try{showGameSetup()}catch(err){showFatal(err)}
 <script src="sk-portrait-expansion.js"></script>
 <script src="sk-lombard-portraits.js"></script>
 <script src="sk-visigoth-portraits.js"></script>
+<script src="sk-frankish-portraits.js"></script>
 <script>
 (function(){
  const pane=document.getElementById('skStartupNotice');
@@ -2134,6 +2141,7 @@ try{showGameSetup()}catch(err){showFatal(err)}
    Object.assign(assets,window.__skPortraitExpansion||{});
    Object.assign(assets,window.__skLombardPortraits||{});
    Object.assign(assets,window.__skVisigothPortraits||{});
+   Object.assign(assets,window.__skFrankishPortraits||{});
    window.__skPortraitAssets=assets;
    for(const tag of document.querySelectorAll('script[type="text/x-sk-source"]')){
      const active=document.createElement('script');active.textContent=tag.textContent;
