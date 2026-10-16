@@ -243,6 +243,13 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
 @keyframes sk-load-travel{0%{transform:translateX(-105%)}100%{transform:translateX(300%)}}
 @keyframes sk-load-rotate{0%,21%{opacity:1}25%,100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){#skStartupNotice .sk-load-horse,#skStartupNotice .sk-load-runner,#skStartupNotice .sk-load-tips span{animation:none}#skStartupNotice .sk-load-tips span:first-child{opacity:1}}
+
+/* V15.6: individual kingdom culture picker */
+.sk-custom-cultures{border:1px solid #d5c9ad;background:#faf5e8;border-radius:12px;padding:10px 12px;margin:6px 0 12px}
+.sk-custom-culture-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.sk-custom-culture-rows label{display:block;font-size:13px;font-weight:700;color:#25473d}
+.sk-custom-culture-rows select{display:block;width:100%;max-width:100%;min-width:0;padding:9px;margin-top:4px;font-size:14px;background:white}
+@media(max-width:550px){.sk-custom-culture-rows{grid-template-columns:minmax(0,1fr)}}
 </style></head><body>
 
 <div id="skStartupNotice" role="status" aria-label="Loading Stable Kingdoms">
@@ -270,13 +277,21 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
   </div>
   <label class="setup-field" style="margin:12px 0">Kingdom cultures and portraits
 <select id="setupPortraitMode">
-<option value="random" selected>Randomize among all seven cultures</option>
+<option value="random" selected>Randomize among all nine cultures</option>
 <option value="anglo">Guarantee Anglo-Saxon among the kingdoms</option>
 <option value="irish">Guarantee Gaelic Irish among the kingdoms</option>
 <option value="welsh">Guarantee Welsh / Brittonic among the kingdoms</option>
 <option value="germanic">Guarantee Continental Saxon / Germanic among the kingdoms</option>
+<option value="lombard">Guarantee Lombard / Italian among the kingdoms</option>
+<option value="visigoth">Guarantee Visigoth / Iberian among the kingdoms</option>
 <option value="classic">Classic: Roman A · Byzantine B · Slavic C · Gaelic D</option>
-</select></label><p class="setup-notice">All available portraits are now included. Welsh queens and Continental Germanic kings temporarily use their uncrowned portraits, labeled as crown artwork pending. Character art does not change the game rules.</p><div id="setupNames"></div><p class="setup-notice" id="setupBots"></p>
+<option value="custom">Customize each kingdom…</option>
+</select></label>
+<div id="skCustomCultures" class="sk-custom-cultures" hidden>
+  <p class="setup-notice"><b>Choose each kingdom's culture.</b> Random chooses an available culture; specific choices may repeat. These options currently work for <b>local games</b> only.</p>
+  <div id="skCustomCultureRows" class="sk-custom-culture-rows"></div>
+</div>
+<p class="setup-notice">Welsh queens and Continental Germanic kings use uncrowned stand-ins until crown artwork arrives. Lombard / Italian and Visigoth / Iberian each have 160 portraits, crowned and uncrowned. Portraits do not change gameplay. Characters' art does not change their statistics or game rules.</p><div id="setupNames"></div><p class="setup-notice" id="setupBots"></p>
   <p class="setup-tip"><b>Local playtest:</b> Human players take turns on this device. A privacy screen appears between human turns. Separate phones sharing one live game will require online multiplayer synchronization.</p>
   <div class="cover-actions"><button id="cancelSetup" type="button">Cancel</button><button class="primary" id="startSetup" type="button">Start game</button><button id="onlineEntry" type="button">🌎 Online: create or join a room</button></div>
   <a id="practiceModeEntry" class="sk-practice-button" href="./stable-marriages-challenge.html" role="button" aria-label="Open Stable Marriages Challenge practice minigame">🧩 Practice Mode: Stable Marriages Challenge Minigame <span aria-hidden="true">↗</span></a>
@@ -398,6 +413,8 @@ const ANGLO_SAXON_PORTRAIT_DATA=window.__skPortraitAssets.ANGLO_SAXON_PORTRAIT_D
 const GAELIC_IRISH_PORTRAIT_DATA=window.__skPortraitAssets.GAELIC_IRISH_PORTRAIT_DATA||{};
 const WELSH_BRITTONIC_PORTRAIT_DATA=window.__skPortraitAssets.WELSH_BRITTONIC_PORTRAIT_DATA||{};
 const CONTINENTAL_GERMANIC_PORTRAIT_DATA=window.__skPortraitAssets.CONTINENTAL_GERMANIC_PORTRAIT_DATA||{};
+const LOMBARD_ITALIAN_PORTRAIT_DATA=window.__skPortraitAssets.LOMBARD_ITALIAN_PORTRAIT_DATA||{};
+const VISIGOTH_IBERIAN_PORTRAIT_DATA=window.__skPortraitAssets.VISIGOTH_IBERIAN_PORTRAIT_DATA||{};
 const CULTURE_LIBRARY={
  roman:{slug:"roman",label:"Roman / Latin",tag:"🏛️ Roman/Latin",data:ROMAN_PORTRAIT_DATA,names:NAMES.A},
  byzantine:{slug:"byzantine",label:"Byzantine Greek",tag:"☦️ Byzantine Greek",data:BYZANTINE_PORTRAIT_DATA,names:NAMES.B},
@@ -414,7 +431,15 @@ const CULTURE_LIBRARY={
  continental_germanic:{slug:"continental_germanic",label:"Continental Saxon / Germanic",tag:"🛡️ Continental Germanic",data:CONTINENTAL_GERMANIC_PORTRAIT_DATA,names:{
    M:["Widukind","Hermann","Brun","Eckhard","Theuderic","Gerold","Bernhard","Lothar","Wulfhard","Alaric","Siegfried","Hrodgar"],
    F:["Hildegard","Gertrud","Adelheid","Brunhild","Mathilda","Irmingard","Ermengard","Rosamund","Walburga","Liutgard","Albrun","Hadewig"]
- }}
+ }},
+ lombard:{slug:"lombard",label:"Lombard / Italian",tag:"🏰 Lombard/Italian",data:LOMBARD_ITALIAN_PORTRAIT_DATA,names:{
+   M:["Alboin","Cleph","Authari","Agilulf","Arioald","Rothari","Grimoald","Liutprand","Ratchis","Desiderius","Adelchis","Gisulf"],
+    F:["Rosamund","Theodelinda","Gundeperga","Rodelinda","Ansa","Ermelinda","Waldrada","Gisla","Gundrada","Gariperga","Adelperga","Bertrada"]
+  }},
+  visigoth_iberian:{slug:"visigoth_iberian",label:"Visigoth / Iberian",tag:"🏰 Visigoth/Iberian",data:VISIGOTH_IBERIAN_PORTRAIT_DATA,names:{
+    M:["Leovigild","Reccared","Sisebut","Suintila","Chindasuinth","Recceswinth","Wamba","Egica","Wittiza","Roderic","Theudis","Alaric","Amalaric","Euric","Athanagild","Liuva"],
+    F:["Goiswintha","Brunhilda","Baddo","Liuvigoto","Cixilo","Clotilde","Recciberga","Theodora","Ingund","Ermengild","Amalberga","Austrechild","Egilona","Fruela","Olalla","Elvira"]
+  }}
 };
 const DEFAULT_CULTURES={A:"roman",B:"byzantine",C:"slavic",D:"gaelic"};
 let setupPortraitMode="random";
@@ -423,10 +448,17 @@ const skCultureSequence=(game,mode)=>{
  // This independent RNG does not alter the game's dice, deck, or matchup sequence.
  const salt=((Number(game?.seed)||11235813)^0x5EEDC0DE)>>>0;
  const rng=new RNG(salt);
- const list=["roman","byzantine","slavic","anglo_saxon","gaelic","welsh_brittonic","continental_germanic"];
+ const list=["roman","byzantine","slavic","anglo_saxon","gaelic","welsh_brittonic","continental_germanic","lombard","visigoth_iberian"];
  rng.shuffle(list);
  if(mode==="classic")return kingdoms.map(k=>DEFAULT_CULTURES[k]||"gaelic");
- const guaranteed={anglo:"anglo_saxon",irish:"gaelic",welsh:"welsh_brittonic",germanic:"continental_germanic"}[mode];
+ // Encoded choices can be reproduced from the game state; blank selections use unique random cultures if possible.
+ if(typeof mode==="string"&&mode.startsWith("custom:")){
+   const requested=mode.slice(7).split(",");
+   const result=kingdoms.map((k,i)=>CULTURE_LIBRARY[requested[i]]?requested[i]:null);
+   const available=list.filter(c=>!result.includes(c));
+   return result.map(c=>c||available.shift()||list[0]);
+ }
+ const guaranteed={anglo:"anglo_saxon",irish:"gaelic",welsh:"welsh_brittonic",germanic:"continental_germanic",lombard:"lombard",visigoth:"visigoth_iberian"}[mode];
  if(guaranteed&&kingdoms.length&&!list.slice(0,kingdoms.length).includes(guaranteed)){
    const i=list.indexOf(guaranteed);
    [list[kingdoms.length-1],list[i]]=[list[i],list[kingdoms.length-1]];
@@ -1807,6 +1839,27 @@ newGame = function() {
   gameEpoch++;botBusy=false;selectedPerson=null;inspectedId=null;activeKingdom='ALL';botMessage='';botLines=[];changedPeople.clear();
   engineNewGame();
 };
+const skCustomCulturePrefs={A:"random",B:"random",C:"random",D:"random"};
+function skSetupPortraitMode(){
+  const mode=$('#setupPortraitMode').value;
+  if(mode!=="custom")return mode;
+  return 'custom:'+ALL_KINGDOMS.slice(0,Number($('#setupKingdomSelect').value)||4).map(k=>skCustomCulturePrefs[k]||'random').join(',');
+}
+function skBuildCustomSelectors(){
+  const n=Number($('#setupKingdomSelect').value)||4;
+  const host=$('#skCustomCultureRows');
+  const allowed=Object.entries(CULTURE_LIBRARY);
+  host.innerHTML=ALL_KINGDOMS.slice(0,n).map(k=>`<label>Kingdom ${k}<select data-culture-for="${k}" aria-label="Culture for Kingdom ${k}"><option value="random">🎲 Random culture</option>${allowed.map(([id,c])=>`<option value="${id}">${c.label}</option>`).join('')}</select></label>`).join('');
+  for(const element of host.querySelectorAll('select')){
+    const k=element.dataset.cultureFor;element.value=skCustomCulturePrefs[k]||'random';
+    element.onchange=()=>skCustomCulturePrefs[k]=element.value;
+  }
+}
+function skUpdateCulturePicker(){
+  const custom=$('#setupPortraitMode').value==='custom';
+  $('#skCustomCultures').hidden=!custom;
+  if(custom)skBuildCustomSelectors();
+}
 function updateSetupControls(){
   const count=Number($('#setupKingdomSelect').value);
   const h=$('#setupHumanSelect');
@@ -1817,6 +1870,7 @@ function updateSetupControls(){
   $('#setupNames').innerHTML=Array.from({length:old},(_,i)=>`<label class="setup-field">Human ${i+1} name<input maxlength="32" data-human="${i}" value="${escapeHTML(prev[i]||setupHumanNames[i]||`Player ${i+1}`)}" autocomplete="off"></label>`).join('');
   $('#setupBots').textContent=`${count-old} random bot${count-old===1?'':'s'} will fill the remaining ${count-old===1?'seat':'seats'}. Turn order is randomized every new game.`;
   $('#cancelSetup').hidden=!g;
+  skUpdateCulturePicker();
 }
 function showGameSetup(){
   $('#setupKingdomSelect').value=String(setupKingdomCount);
@@ -1831,10 +1885,11 @@ function beginConfiguredGame(){
   const count=Number($('#setupKingdomSelect').value),humans=Number($('#setupHumanSelect').value);
   if(!Number.isInteger(count)||count<1||count>4||!Number.isInteger(humans)||humans<1||humans>count)throw Error('Invalid kingdom or human count');
   const names=[...$('#setupNames').querySelectorAll('input')].map((x,i)=>x.value.trim().slice(0,32)||`Player ${i+1}`);
-  setupKingdomCount=count;setupHumanNames=names;setupPortraitMode=$('#setupPortraitMode').value;
+  setupKingdomCount=count;setupHumanNames=names;setupPortraitMode=skSetupPortraitMode();
   $('#setupCover').hidden=true;$('#passCover').hidden=true;
   newGame();
 }
+$('#setupPortraitMode').onchange=()=>skUpdateCulturePicker();
 $('#setupKingdomSelect').onchange=()=>updateSetupControls();
 $('#setupHumanSelect').onchange=()=>updateSetupControls();
 $('#startSetup').onclick=()=>{try{beginConfiguredGame()}catch(err){showFatal(err);$('#setupCover').hidden=false}};
@@ -2014,9 +2069,9 @@ try{showGameSetup()}catch(err){showFatal(err)}
     leaveCurrentRoomLocally();
   }catch(e){err(e.message);loading=false;el('onlineAbandon').disabled=false;}
  };
- el('onlineCreate').onclick=()=>enter('create',{kingdoms:Number(el('setupKingdomSelect').value),humans:Number(el('setupHumanSelect').value),name:el('onlineHostName').value,portraitMode:el('setupPortraitMode').value});
+ el('onlineCreate').onclick=()=>{if(!['random','classic','anglo'].includes(el('setupPortraitMode').value)){err('The online server currently supports Random, Classic and Guarantee Anglo-Saxon only. Select one of those options, or customize cultures in a local game.');return;}enter('create',{kingdoms:Number(el('setupKingdomSelect').value),humans:Number(el('setupHumanSelect').value),name:el('onlineHostName').value,portraitMode:el('setupPortraitMode').value});};
  el('onlineJoin').onclick=()=>enter('join',{code:el('onlineJoinCode').value,name:el('onlineJoinName').value});
- el('onlineStart').onclick=()=>room&&enter('start',{roomId:room.roomId,portraitMode:el('setupPortraitMode').value});
+ el('onlineStart').onclick=()=>{if(!['random','classic','anglo'].includes(el('setupPortraitMode').value)){err('The online server currently supports Random, Classic and Guarantee Anglo-Saxon only. Change the culture selection before starting this online room.');return;}if(room)enter('start',{roomId:room.roomId,portraitMode:el('setupPortraitMode').value});};
  el('onlineCopyInvite').onclick=copyTableLink;
  el('onlineCopyTable').onclick=copyTableLink;
  el('onlineLeave').onclick=()=>{
@@ -2066,6 +2121,8 @@ try{showGameSetup()}catch(err){showFatal(err)}
 })();
 </script>
 <script src="sk-portrait-expansion.js"></script>
+<script src="sk-lombard-portraits.js"></script>
+<script src="sk-visigoth-portraits.js"></script>
 <script>
 (function(){
  const pane=document.getElementById('skStartupNotice');
@@ -2075,6 +2132,8 @@ try{showGameSetup()}catch(err){showFatal(err)}
    assets.ANGLO_SAXON_PORTRAIT_DATA=pack.anglo;
    // V15.4 additional culture portraits, kept in a companion script for easy upload.
    Object.assign(assets,window.__skPortraitExpansion||{});
+   Object.assign(assets,window.__skLombardPortraits||{});
+   Object.assign(assets,window.__skVisigothPortraits||{});
    window.__skPortraitAssets=assets;
    for(const tag of document.querySelectorAll('script[type="text/x-sk-source"]')){
      const active=document.createElement('script');active.textContent=tag.textContent;
