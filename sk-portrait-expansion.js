@@ -88,3 +88,11 @@ window.__skPortraitExpansion={"GAELIC_IRISH_PORTRAIT_DATA":{"gaelic_m_very_low_0
   }
   window.__skFinnicPortraitsReady=true;
 })();
+
+/* Stable Kingdoms Magyar extension. Keep the Finnic and earlier portraits unchanged.
+   Synchronously load the new portrait sheet data before the game engine boots. */
+if (document.readyState === 'loading') {
+  document.write('<script src="sk-magyar-portraits.js"><\/script>');
+} else {
+  console.error('Magyar portrait loader must run during page parsing.');
+}
