@@ -53,3 +53,10 @@
   }
   window.__skMagyarPortraitsReady=true;
 })();
+
+/* Steppe Turkic expansion (separate file; existing cultures are retained). */
+if (document.readyState === 'loading') {
+  document.write('<script src="sk-steppe-portraits.js"><\/script>');
+} else {
+  console.error('Steppe Turkic portrait loader must run during page parsing.');
+}
