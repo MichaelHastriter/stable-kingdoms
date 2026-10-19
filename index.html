@@ -2130,6 +2130,7 @@ try{showGameSetup()}catch(err){showFatal(err)}
 <script src="sk-lombard-portraits.js"></script>
 <script src="sk-visigoth-portraits.js"></script>
 <script src="sk-frankish-portraits.js"></script>
+<script src="sk-four-cultures-portraits.js"></script>
 <script>
 (function(){
  const pane=document.getElementById('skStartupNotice');
@@ -2143,6 +2144,8 @@ try{showGameSetup()}catch(err){showFatal(err)}
    Object.assign(assets,window.__skVisigothPortraits||{});
    Object.assign(assets,window.__skFrankishPortraits||{});
    window.__skPortraitAssets=assets;
+   // Register Georgian, Armenian, Persian and Arabian portraits before game startup.
+   window.__skFourCultureInstall?.();
    for(const tag of document.querySelectorAll('script[type="text/x-sk-source"]')){
      const active=document.createElement('script');active.textContent=tag.textContent;
      document.body.appendChild(active);
