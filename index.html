@@ -277,7 +277,7 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
   </div>
   <label class="setup-field" style="margin:12px 0">Kingdom cultures and portraits
 <select id="setupPortraitMode">
-<option value="random" selected>Randomize among all ten cultures</option>
+<option value="random" selected>Randomize among available cultures</option>
 <option value="anglo">Guarantee Anglo-Saxon among the kingdoms</option>
 <option value="irish">Guarantee Gaelic Irish among the kingdoms</option>
 <option value="welsh">Guarantee Welsh / Brittonic among the kingdoms</option>
@@ -285,6 +285,8 @@ body.busy .private-notes,body.busy #worldScore,body.busy .turn-dock,body.busy #i
 <option value="lombard">Guarantee Lombard / Italian among the kingdoms</option>
 <option value="visigoth">Guarantee Visigoth / Iberian among the kingdoms</option>
 <option value="frankish">Guarantee Frankish among the kingdoms</option>
+<option value="jewish">Guarantee Medieval Jewish among the kingdoms</option>
+<option value="amazigh">Guarantee Amazigh / Berber among the kingdoms</option>
 <option value="classic">Classic: Roman A · Byzantine B · Slavic C · Gaelic D</option>
 <option value="custom">Customize each kingdom…</option>
 </select></label>
@@ -417,6 +419,8 @@ const CONTINENTAL_GERMANIC_PORTRAIT_DATA=window.__skPortraitAssets.CONTINENTAL_G
 const LOMBARD_ITALIAN_PORTRAIT_DATA=window.__skPortraitAssets.LOMBARD_ITALIAN_PORTRAIT_DATA||{};
 const VISIGOTH_IBERIAN_PORTRAIT_DATA=window.__skPortraitAssets.VISIGOTH_IBERIAN_PORTRAIT_DATA||{};
 const FRANKISH_PORTRAIT_DATA=window.__skPortraitAssets.FRANKISH_PORTRAIT_DATA||{};
+const MEDIEVAL_JEWISH_PORTRAIT_DATA=window.__skPortraitAssets.MEDIEVAL_JEWISH_PORTRAIT_DATA||{};
+const AMAZIGH_BERBER_PORTRAIT_DATA=window.__skPortraitAssets.AMAZIGH_BERBER_PORTRAIT_DATA||{};
 const CULTURE_LIBRARY={
  roman:{slug:"roman",label:"Roman / Latin",tag:"🏛️ Roman/Latin",data:ROMAN_PORTRAIT_DATA,names:NAMES.A},
  byzantine:{slug:"byzantine",label:"Byzantine Greek",tag:"☦️ Byzantine Greek",data:BYZANTINE_PORTRAIT_DATA,names:NAMES.B},
@@ -445,7 +449,10 @@ const CULTURE_LIBRARY={
   visigoth_iberian:{slug:"visigoth_iberian",label:"Visigoth / Iberian",tag:"🏰 Visigoth/Iberian",data:VISIGOTH_IBERIAN_PORTRAIT_DATA,names:{
     M:["Leovigild","Reccared","Sisebut","Suintila","Chindasuinth","Recceswinth","Wamba","Egica","Wittiza","Roderic","Theudis","Alaric","Amalaric","Euric","Athanagild","Liuva"],
     F:["Goiswintha","Brunhilda","Baddo","Liuvigoto","Cixilo","Clotilde","Recciberga","Theodora","Ingund","Ermengild","Amalberga","Austrechild","Egilona","Fruela","Olalla","Elvira"]
-  }}
+  }},
+ medieval_jewish:{slug:"medieval_jewish",label:"Medieval Jewish",tag:"✡️ Medieval Jewish",data:MEDIEVAL_JEWISH_PORTRAIT_DATA,names:{M:["Abraham", "Isaac", "Jacob", "Moses", "Aaron", "David", "Solomon", "Joseph", "Samuel", "Daniel", "Nathan", "Benjamin", "Judah", "Levi", "Ezra", "Elijah", "Simeon", "Reuben", "Asher", "Meir", "Eliezer", "Menachem", "Baruch", "Nissim", "Maimon", "Saadia", "Hasdai", "Obadiah", "Azriel", "Gedaliah", "Ephraim", "Zebulun", "Yehoshua", "Yitzhak", "Yosef", "Yehuda"],F:["Sarah", "Rebecca", "Rachel", "Leah", "Miriam", "Esther", "Hannah", "Deborah", "Abigail", "Judith", "Tamar", "Naomi", "Dinah", "Ruth", "Zipporah", "Yael", "Hadassah", "Shoshana", "Simha", "Jamila", "Mazal", "Reina", "Bella", "Dulce", "Oro", "Luna", "Gracia", "Zohra", "Malka", "Sitt", "Batya", "Esterina", "Bona", "Bonafilia", "Sarita", "Yocheved"]}},
+ amazigh_berber:{slug:"amazigh_berber",label:"Amazigh / Berber",tag:"ⵣ Amazigh / Berber",data:AMAZIGH_BERBER_PORTRAIT_DATA,names:{M:["Ziri", "Buluggin", "Badis", "Hammad", "Yaghmurasen", "Yusuf", "Yaqub", "Idris", "Yahya", "Musa", "Tariq", "Abd al-Mumin", "Abdallah", "Muhammad", "Ibrahim", "Ali", "Hassan", "Husayn", "Umar", "Ismail", "Ahmad", "Abu Bakr", "Uthman", "Abd al-Aziz", "Hafsid", "Mansur", "Makhluf", "Ayyub", "Masud", "Salih", "Hafs", "Fadl", "Rashid", "Wakil", "Khalaf", "Sulayman"],F:["Dihya", "Tin Hinan", "Tiziri", "Tafukt", "Tifawt", "Tanirt", "Fatima", "Aisha", "Zaynab", "Maryam", "Khadija", "Rahma", "Habiba", "Amira", "Zahra", "Lalla", "Tamima", "Amina", "Asma", "Safiyya", "Hafsa", "Salma", "Halima", "Ruqayya", "Sakina", "Nafisa", "Samira", "Lubna", "Tala", "Aziza", "Houria", "Suhaila", "Kenza", "Malika", "Warda", "Zohra"]}},
+
 };
 const DEFAULT_CULTURES={A:"roman",B:"byzantine",C:"slavic",D:"gaelic"};
 let setupPortraitMode="random";
@@ -454,7 +461,7 @@ const skCultureSequence=(game,mode)=>{
  // This independent RNG does not alter the game's dice, deck, or matchup sequence.
  const salt=((Number(game?.seed)||11235813)^0x5EEDC0DE)>>>0;
  const rng=new RNG(salt);
- const list=["roman","byzantine","slavic","anglo_saxon","gaelic","welsh_brittonic","continental_germanic","lombard","visigoth_iberian","frankish"];
+ const list=["roman","byzantine","slavic","anglo_saxon","gaelic","welsh_brittonic","continental_germanic","lombard","visigoth_iberian","frankish","medieval_jewish","amazigh_berber"];
  rng.shuffle(list);
  if(mode==="classic")return kingdoms.map(k=>DEFAULT_CULTURES[k]||"gaelic");
  // Encoded choices can be reproduced from the game state; blank selections use unique random cultures if possible.
@@ -464,7 +471,7 @@ const skCultureSequence=(game,mode)=>{
    const available=list.filter(c=>!result.includes(c));
    return result.map(c=>c||available.shift()||list[0]);
  }
- const guaranteed={anglo:"anglo_saxon",irish:"gaelic",welsh:"welsh_brittonic",germanic:"continental_germanic",lombard:"lombard",visigoth:"visigoth_iberian",frankish:"frankish"}[mode];
+ const guaranteed={anglo:"anglo_saxon",irish:"gaelic",welsh:"welsh_brittonic",germanic:"continental_germanic",lombard:"lombard",visigoth:"visigoth_iberian",frankish:"frankish",jewish:"medieval_jewish",amazigh:"amazigh_berber"}[mode];
  if(guaranteed&&kingdoms.length&&!list.slice(0,kingdoms.length).includes(guaranteed)){
    const i=list.indexOf(guaranteed);
    [list[kingdoms.length-1],list[i]]=[list[i],list[kingdoms.length-1]];
@@ -2131,6 +2138,7 @@ try{showGameSetup()}catch(err){showFatal(err)}
 <script src="sk-visigoth-portraits.js"></script>
 <script src="sk-frankish-portraits.js"></script>
 <script src="sk-four-cultures-portraits.js"></script>
+<script src="sk-jewish-amazigh-portraits.js"></script>
 <script>
 (function(){
  const pane=document.getElementById('skStartupNotice');
@@ -2143,6 +2151,7 @@ try{showGameSetup()}catch(err){showFatal(err)}
    Object.assign(assets,window.__skLombardPortraits||{});
    Object.assign(assets,window.__skVisigothPortraits||{});
    Object.assign(assets,window.__skFrankishPortraits||{});
+   Object.assign(assets,window.__skJewishAmazighPortraits||{});
    window.__skPortraitAssets=assets;
    // Register Georgian, Armenian, Persian and Arabian portraits before game startup.
    window.__skFourCultureInstall?.();
