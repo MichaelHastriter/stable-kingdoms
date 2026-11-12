@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#214d3a"><title>Stable Marriages — Ranked Play</title>
+<style>
+:root{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#213d31;color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#f3f1e9}.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#194936;color:#fff;padding:9px max(12px,calc((100% - 1500px)/2));min-height:60px}.brand{font-weight:800;font-size:16px}.muted{font-size:12px;color:#e1e9dd}.buttons{display:flex;gap:8px;flex-wrap:wrap}button,.btn{border:1px solid #9aa79c;border-radius:9px;background:#fff;padding:9px 12px;font:700 13px system-ui;cursor:pointer;text-decoration:none;color:#174a35}button:focus-visible,.btn:focus-visible{outline:3px solid #7bc2a0}#status{font-size:12px;max-width:980px;margin:0 auto;padding:5px 12px;color:#496256;min-height:26px}.gameFrame{display:block;width:100%;height:calc(100dvh - 91px);min-height:550px;border:0;background:#f3f1e9}dialog{border:1px solid #9caa9b;border-radius:16px;box-shadow:0 20px 70px #0009;padding:0;background:#fffdf5;color:#203d30;width:min(680px,calc(100% - 24px));max-height:85dvh}dialog::backdrop{background:#03120ab0}.modalHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#eaf0e7;padding:15px 17px}.modalHeader h2{font-size:21px;margin:0;font-family:Georgia,serif}.body{padding:16px;overflow:auto;max-height:70dvh}input{font:16px system-ui;border:1px solid #849587;border-radius:9px;padding:12px;max-width:100%;width:100%;margin:8px 0}label{font-weight:700;font-size:14px}.primary{background:#194e37;color:white;border-color:#194e37}.rankRow{display:grid;grid-template-columns:40px minmax(80px,1fr) auto;gap:8px;padding:10px 4px;border-bottom:1px solid #e1e6df;font-size:14px}.rankRow:nth-child(-n+3){font-weight:750}.number{font-variant-numeric:tabular-nums}.hint{font-size:13px;color:#657267;line-height:1.5}.error{color:#922c20}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.score{font-size:27px;font-weight:850;color:#204c35}#scoresList{max-height:55dvh;overflow:auto}#fallback{display:none;position:fixed;bottom:18px;left:12px;right:12px;max-width:780px;margin:auto;padding:14px;border-radius:10px;background:#fff;border:2px solid #ccaa63;box-shadow:0 6px 30px #0004}#fallback a{color:#174a35} @media(max-width:600px){.bar{padding:8px 10px}.brand{font-size:14px}.muted{display:none}.gameFrame{height:calc(100dvh - 88px)}dialog .body{padding:13px}}
+</style></head><body>
+<header class="bar"><div><div class="brand">💍 Stable Marriages — Ranked Challenge</div><div class="muted">Original five-minute game · Top 100 scores</div></div><div class="buttons"><button id="scoresBtn">🏆 Top 100</button><a class="btn" href="stable-marriages-finnic-expanded.html" target="_blank" rel="noopener">Original game ↗</a></div></header>
+<div id="status" role="status">Loading original challenge. Final scores are captured automatically after completion.</div>
+<iframe id="game" class="gameFrame" src="stable-marriages-finnic-expanded.html" title="Original Stable Marriages Challenge"></iframe>
+<div id="fallback"><strong>Ranked score capture unavailable in this browser.</strong><p>This add-on must be uploaded into the same GitHub Pages folder as <code>stable-marriages-finnic-expanded.html</code>. Opening the HTML directly from Downloads will block score detection.</p><a href="https://michaelhastriter.github.io/stable-kingdoms/stable-marriages-ranked.html">Open the ranked version on GitHub Pages</a></div>
+<dialog id="dlg" aria-labelledby="dialogTitle"><div class="modalHeader"><h2 id="dialogTitle">🏆 Top 100</h2><button id="close" aria-label="Close">✕</button></div><div class="body" id="dialogBody"></div></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{'use strict';
+const BASE='https://umrzadpfoylkgdcaauiu.supabase.co';const KEY='sb_publishable_Mj32k6Cdm8vjvJ26JZalXA_u1uwy3XI';
+const game=document.getElementById('game'),status=document.getElementById('status'),dlg=document.getElementById('dlg'),body=document.getElementById('dialogBody'),title=document.getElementById('dialogTitle');
+let authClient=null,locked=false,lastScore=null,activeRun=crypto.randomUUID(),checking=false,blocked=false;
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const setStatus=s=>{status.textContent=s};
+const show=(heading,html)=>{title.textContent=heading;body.innerHTML=html;if(!dlg.open)dlg.showModal()};
+document.getElementById('close').onclick=()=>dlg.close();document.getElementById('scoresBtn').onclick=()=>loadBoard();
+async function auth(){if(!window.supabase?.createClient)throw Error('Score service library did not load. Check your connection.');
+ if(!authClient)authClient=window.supabase.createClient(BASE,KEY,{auth:{storageKey:'stable_marriages_ranked_auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ let {data:{session}}=await authClient.auth.getSession();if(!session){const {data,error}=await authClient.auth.signInAnonymously();if(error)throw error;session=data.session}
+ if(!session?.access_token)throw Error('Sign-in failed');return session.access_token;
+}
+async function api(action,payload={}){const token=await auth(),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),17000);try{
+ const res=await fetch(BASE+'/functions/v1/arcade-top100',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token,apikey:KEY},body:JSON.stringify({game:'marriages',action,...payload}),signal:controller.signal});
+ const result=await res.json().catch(()=>({}));if(!res.ok)throw Error(result.error||'Score server responded '+res.status);return result;
+ }finally{clearTimeout(timer)}}
+function restart(){locked=false;checking=false;lastScore=null;activeRun=crypto.randomUUID();setStatus('New five-minute challenge in progress. The final score will be checked when time expires.');}
+game.addEventListener('load',()=>{restart();try{game.contentDocument.addEventListener('click',e=>{
+ const btn=e.target.closest('button');if(btn&&/play another five minutes/i.test(btn.innerText))restart();
+ },true)}catch{}});
+function parseScore(raw){const m=raw.match(/Final score:\s*([\d][\d.,\s]*)\s*points\b/i);if(!m)return null;const digits=m[1].replace(/[^\d]/g,'');const n=Number(digits);return Number.isSafeInteger(n)&&n>0?n:null;}
+async function complete(score){if(locked)return;locked=true;lastScore={score,runId:activeRun};setStatus('Five-minute challenge complete · '+score.toLocaleString()+' points. Checking worldwide Top 100…');
+ try{const out=await api('qualify',{score});if(out.qualified){popup(score,out.rank)}else setStatus('Final score: '+score.toLocaleString()+'. Not in the Top 100 yet (estimated rank #'+out.rank+'). Play again to improve!')}
+ catch(e){setStatus('Final score saved for this session: '+score.toLocaleString()+'. Ranking check failed: '+e.message);show('Score captured',`<p class="score">${score.toLocaleString()} points</p><p class="error">Could not check the leaderboard: ${esc(e.message)}</p><button class="primary" id="retryCheck">Retry Top 100 check</button>`);document.getElementById('retryCheck').onclick=()=>{dlg.close();locked=false;complete(score)}}
+}
+function popup(score,rank){show('🎉 You made the Top 100!',`<p class="score">${score.toLocaleString()} points</p><p>Congratulations! Your estimated worldwide position is <strong>#${rank}</strong>.</p><label for="playerName">Enter your name to claim your ranking</label><input id="playerName" maxlength="32" autocomplete="nickname" placeholder="Player name" value="${esc(localStorage.getItem('sm_player_name')||'')}"><div class="actions"><button class="primary" id="submit">Save my high score</button><button id="skip">Not now</button></div><p class="hint">Your result is captured from the original game's completion screen. These community rankings are player-reported, not yet independently cheat-verified. Your name will be public.</p><p role="status" id="submitMessage"></p>`);
+ document.getElementById('skip').onclick=()=>dlg.close();document.getElementById('submit').onclick=async()=>{const name=document.getElementById('playerName').value.trim(),msg=document.getElementById('submitMessage'),button=document.getElementById('submit');
+ if(!name||name.length>32){msg.textContent='Please enter a name (1–32 characters).';return}button.disabled=true;msg.textContent='Saving score…';
+ try{const o=await api('submit',{score,name,runId:lastScore.runId});localStorage.setItem('sm_player_name',name);setStatus('Score submitted: '+score.toLocaleString()+' points · Rank #'+o.rank+'.');show('🏆 Score saved!',`<p class="score">#${o.rank} — ${score.toLocaleString()} points</p><p>${esc(name)}, your result has been added to Stable Marriages Top 100.</p><div class="actions"><button class="primary" id="viewNow">View Top 100</button><button id="done">Back to game</button></div>`);document.getElementById('viewNow').onclick=loadBoard;document.getElementById('done').onclick=()=>dlg.close();}
+ catch(e){msg.textContent='Could not save: '+e.message;button.disabled=false;}
+ };
+}
+async function loadBoard(){show('🏆 Stable Marriages — Top 100','<p id="loading">Loading live scores…</p>');try{const d=await api('leaderboard');const entries=d.boards?.score||[];
+ const rows=entries.map((e,i)=>`<div class="rankRow"><strong>${i+1}.</strong><span>${esc(e.name)}</span><strong class="number">${Number(e.score).toLocaleString()}</strong></div>`).join('');
+ body.innerHTML=`<p class="hint">Five-minute challenge · Highest point totals. ${entries.length} of 100 positions filled. Player-reported scores; server-side game verification is a future improvement.</p><div id="scoresList">${rows||'<p>No scores submitted yet. Complete a five-minute challenge to make the first entry!</p>'}</div><div class="actions"><button id="closeBoard">Back to game</button></div>`;document.getElementById('closeBoard').onclick=()=>dlg.close();
+ }catch(e){body.innerHTML=`<p class="error">Unable to load scores: ${esc(e.message)}</p><button id="retryBoard">Retry</button>`;document.getElementById('retryBoard').onclick=loadBoard}}
+let failed=0;
+setInterval(()=>{if(locked||checking)return;let doc;
+ try{doc=game.contentDocument;if(!doc||!doc.body)throw Error('No access');failed=0}catch(e){if(++failed>5&&!blocked){blocked=true;document.getElementById('fallback').style.display='block';setStatus('Score capture needs the hosted, same-origin GitHub Pages version.')}return}
+ const text=doc.body.innerText||'';if(!/Challenge complete!/i.test(text))return;
+ const points=parseScore(text);if(points!==null){checking=true;complete(points).finally(()=>{checking=false})}
+},900);
+})();
+</script></body></html>
